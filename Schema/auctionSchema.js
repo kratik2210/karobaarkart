@@ -1,0 +1,69 @@
+const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
+
+const auctionSchema = new Schema({
+    vehicleId: {
+        type: Schema.Types.ObjectId,
+        ref: 'Vehicle',
+        required: true
+    },
+    scheduleStart: {
+        startTime: {
+            type: Date,
+            required: true
+        },
+        startDate: {
+            type: Date,
+            required: true
+        }
+    },
+    scheduleEnd: {
+        endTime: {
+            type: Date,
+            required: true
+        },
+        endDate: {
+            type: Date,
+            required: true
+        }
+    },
+    startingBid: {
+        type: Number,
+        required: true
+    },
+    currentBid: {
+        type: Number
+    },
+    highestBidder: {
+        type: Schema.Types.ObjectId,
+        ref: 'Dealer'
+    },
+    auctionStatus: {
+        type: String,
+        enum: ['ongoing', 'completed', 'cancelled']
+    },
+    createdBy: {
+        type: Schema.Types.ObjectId,
+        ref: 'User'
+    },
+    createdAt: {
+        type: Date,
+        default: Date.now
+    },
+    updatedBy: {
+        type: Schema.Types.ObjectId,
+        ref: 'User'
+    },
+    updatedAt: {
+        type: Date,
+        default: Date.now
+    },
+    isActive: {
+        type: Boolean,
+        default: true
+    }
+});
+
+const Auction = mongoose.model('Auction', auctionSchema);
+
+module.exports = Auction;

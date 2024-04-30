@@ -1,0 +1,141 @@
+const errorCodes = {
+    SUCCESS: {
+        Text: 'Success',
+        Value: 200,
+    },
+    BAD_REQUEST: {
+        Text: 'Bad Request',
+        Value: 400,
+    },
+    UNAUTHORIZED: {
+        Text: 'Unauthorized',
+        Value: 401,
+    },
+    INTERNAL_SERVER_ERROR: {
+        Text: 'Internal Server Error',
+        Value: 500,
+    },
+    PAGE_NOT_FOUND: {
+        Text: 'Page not found',
+        Value: 404,
+    },
+    NOT_REGISTERED: {
+        Text: 'User not registered',
+        Value: 401,
+    },
+
+};
+
+const commonCodes = {
+    SUCCESS: {
+        status: '200',
+        message: 'Success',
+    },
+    NORECORDS: {
+        status: '97',
+        message: 'No Records to Send',
+    },
+    PARAM_ERR: {
+        status: '400',
+        message: 'Parameter error',
+    },
+    SERVER_ERR: {
+        status: '99',
+        message: 'Internal Server error',
+    },
+    PAGE_NOT_FOUND: {
+        status: '404',
+        message: 'Page not found',
+    },
+    APP_TRANSACTION_ERROR: {
+        status: '402',
+        message: 'App Transaction Error',
+    },
+    APP_FUNCTION_ERROR: {
+        status: '500',
+        message: 'App Function Error',
+    },
+    CREDENTIAL: {
+        message: 'Unauthorized',
+        status: '401',
+    },
+    AUTH_ERR: {
+        message: 'Invalid Credentials',
+        status: '401',
+    },
+};
+
+const API_RESP_CODES = {
+    HTTP_SUCCESS: {
+        message: 'Success',
+        status: 200,
+    },
+    HTTP_BAD_REQUEST: {
+        message: 'Bad Request',
+        status: 400,
+    },
+    HTTP_UNAUTHORIZED: {
+        message: 'Unauthorized',
+        status: 401,
+    },
+    HTTP_SERVER_ERR: {
+        message: 'Internal Server Error',
+        status: 500,
+    },
+    PAGE_NOT_FOUND: {
+        message: 'Page not found',
+        status: 404,
+    },
+    APP_PARAM_ERROR: {
+        status: '400',
+        message: 'Parameter error',
+    },
+    AUTHENTICATION_REQUIRED: {
+        status: 511,
+        message: 'Authentication required',
+    },
+    TOKEN_INVALID: {
+        status: 498,
+        message: 'Invaild token entered',
+    },
+    OTP_SUCCESS: {
+        status: 200,
+        message: 'OTP send successfully to registered mobile number',
+    },
+    OTP_INVALID: {
+        status: 410,
+        message: 'OTP is invalid or expired',
+    },
+    VEHICLE_EXIST: {
+        status: 400,
+        message: 'Vehicle already exists in wishlist',
+    },
+};
+
+const ErrorMessages = {
+    INTERNAL_SERVER_ERROR: 'INTERNAL_SERVER_ERROR',
+    APPLICATION_KEY_INVALID: 'APPLICATION_KEY_INVALID',
+    USER_NOT_FOUND: 'USER_NOT_FOUND',
+    INVALID_CREDENTIALS: 'INVALID_CREDENTIALS',
+    JWT_SECRET_MISSING: 'JWT_SECRET_MISSING',
+    JWT_FAILED_TOKEN_VERIFICATION: 'JWT_FAILED_TOKEN_VERIFICATION',
+    AUTHENTICATION_SUCCESS: 'AUTHENTICATION_SUCCESS',
+    TOKEN_RENEWED: 'TOKEN_RENEWED',
+    TOKEN_INVALID: 'TOKEN_INVALID',
+    TOKEN_VALID: 'TOKEN_VALID',
+    SESSION_EXPIRED: 'SESSION_EXPIRED',
+    ACCOUNT_LOCKED_MULTIPLE_ATTEMPTS: 'ACCOUNT_LOCKED_MULTIPLE_ATTEMPTS',
+    ACCOUNT_IS_INACTIVE: 'ACCOUNT_IS_INACTIVE',
+    ACCOUNT_IS_DEACTIVATED: 'ACCOUNT_IS_DEACTIVATED',
+    ACCOUNT_IS_BLOCKED: 'ACCOUNT_IS_BLOCKED',
+    OTP_INVALID: 'OTP_INVALID',
+    OTP_EXPIRED: 'OTP_EXPIRED',
+    USER_UPDATE_SUCCESS: 'USER UPDATED SUCCESSFULLY',
+
+};
+
+module.exports = {
+    errorCodes,
+    API_RESP_CODES,
+    ErrorMessages
+};

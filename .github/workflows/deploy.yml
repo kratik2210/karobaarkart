@@ -28,4 +28,4 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SSH_PORT }}
           script: |
-            sshpass -p ${{ secrets.SSH_PRIVATE_KEY }}--exclude='.git/' --exclude='.github/' --exclude='README.md' --exclude='.gitignore' --exclude='.eslintrc.json' /path/to/your/local/files/* ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }}.host.secureserver.net:/home1/karobaar/public_html/api.karobaarkart.com/
+            rsync -avz --exclude='.git/' --exclude='.github/' --exclude='README.md' --exclude='.gitignore' --exclude='.eslintrc.json' ./* ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }}:/home1/karobaar/public_html/api.karobaarkart.com/

@@ -18,7 +18,7 @@ jobs:
           ssh ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} 'touch /home1/karobaar/public_html/api.karobaarkart.com/tmp/restart.txt'
 
       - name: 📂 Sync files
-        uses: appleboy/ssh-action@v2
+        uses: actions/setup-node@v3
         with:
           host: ${{ secrets.SERVER_IP }}
           username: ${{ secrets.SSH_USER }}

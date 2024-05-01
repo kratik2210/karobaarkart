@@ -39,7 +39,7 @@ const logger = pino({
             // Log to console
             { target: 'pino-pretty', options: { translateTime: "sys:dd-mm-yyyy HH:MM:ss" } },
             // Log to success log file
-            { target: 'pino-pretty', options: { translateTime: "sys:dd-mm-yyyy HH:MM:ss", destination: fileOptions.filename, level: fileOptions.level, colorize: false } },
+            // { target: 'pino-pretty', options: { translateTime: "sys:dd-mm-yyyy HH:MM:ss", destination: fileOptions.filename, level: fileOptions.level, colorize: false } },
             // Log to error log file
             { target: 'pino-pretty', options: { translateTime: "sys:dd-mm-yyyy HH:MM:ss", destination: errorFileOptions.filename, level: errorFileOptions.level, colorize: false } }
         ]

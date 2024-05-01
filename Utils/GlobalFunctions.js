@@ -10,10 +10,10 @@ env.config();
 
 // JWT token generate
 exports.generateToken = function (payload) {
-   return JWT.sign(payload, process.env.JWT_SECRETKEY, { expiresIn: JWT_EXPIRY_IN_HOURS + 's' });
+   return JWT.sign(payload, process.env.JWT_SECRETKEY, { expiresIn: JWT_EXPIRY_IN_HOURS + 'd' });
 }
 exports.generateRefreshToken = function (payload) {
-   return JWT.sign(payload, process.env.JWT_SECRETKEY, { expiresIn: JWT_REFRESH_EXPIRY_IN_HOURS + 'h' });
+   return JWT.sign(payload, process.env.JWT_SECRETKEY, { expiresIn: JWT_REFRESH_EXPIRY_IN_HOURS + 'd' });
 }
 
 
@@ -39,12 +39,11 @@ exports.authMiddleware = function (req, res, next) {
       const isAuth = token.split(" ")[1];
       JWT.verify(isAuth, process.env.JWT_SECRETKEY, function (error, decoded) {
          if (error) {
-            // res.status(400).json({ Message: "Invaild token entered." })
             Logger.error(` ${new Date()} "authMiddleware":${error}`);
-            res.status(API_RESP_CODES.TOKEN_INVALID.status).send({
-               status: API_RESP_CODES.TOKEN_INVALID.status,
-               message: error.message,
-               data: { error: error },
+            res.status(400).send({
+               success: false,
+               message: 'JWT has expired',
+               data: null,
             });
          } else {
             req.user = decoded;

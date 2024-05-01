@@ -1,5 +1,6 @@
 const Vehicle = require('../Schema/vehicleSchema');
 
+
 exports.createVehicle = async (req, res) => {
     try {
         const { brandId, modelName, modelYear, modelNumber, modelPrice, modelLocation, description, mileage, fuelType, loadingCapacity, insurance, kmsDriven, condition, inquireStatus } = req.body;
@@ -45,10 +46,13 @@ exports.createVehicle = async (req, res) => {
             data: savedVehicle,
         });
     } catch (error) {
-        console.error('Error creating vehicle:', error);
+        if (error.code === 11000 && error.keyPattern && error.keyValue) {
+            return res.status(400).json({ success: false, message: 'Key already present in the database,Unique key required', error: error.keyValue });
+        }
         res.status(500).json({ success: false, message: 'Internal server error' });
     }
 };
+
 
 
 exports.getVehicles = async (req, res) => {

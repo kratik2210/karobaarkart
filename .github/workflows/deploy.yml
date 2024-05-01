@@ -20,7 +20,7 @@ jobs:
 
       - name: Creating restart file
         run: |
-          ssh ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} 'touch /home1/karobaar/public_html/api.karobaarkart.com/tmp/restart.txt'
+          sshpass -p "${{ secrets.SSH_PASSWORD }}" ssh ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} 'touch /home1/karobaar/public_html/api.karobaarkart.com/tmp/restart.txt'
 
       - name: 📂 Sync files
         uses: actions/setup-node@v4

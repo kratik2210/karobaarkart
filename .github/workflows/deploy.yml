@@ -2,7 +2,7 @@ on:
   push:
     branches: ["dev"]
 
-name: 🚀 CI/CD - Deploy to cPanel
+name: 🚀 CI/CD - Deployment
 
 jobs:
   web-deploy:

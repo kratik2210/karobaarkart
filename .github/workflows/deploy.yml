@@ -15,17 +15,18 @@ jobs:
         with:
           node-version: "20"
 
-      - name: Install dependencies
-        run: npm install --f
-
-      - name: 📂 Sync files
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: "20"
 
-          host: ${{ secrets.SERVER_IP }}
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          port: ${{ secrets.SSH_PORT }}
-          script: |
-            rsync -avz --exclude='.git/' --exclude='.github/' --exclude='README.md' --exclude='.gitignore' --exclude='.eslintrc.json' ./* ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }}:/home1/karobaar/public_html/api.karobaarkart.com/
+      - name: Install dependencies
+        run: npm install
+
+      - name: Deploy to cPanel
+        uses: SamKirkland/web-deploy@v1
+        with:
+          target-server: https://api.karobaarkart.com
+          remote-user: ${{ secrets.SERVER_USER }}
+          private-ssh-key: ${{ secrets.SSH_KEY }}
+          destination-path: ~/home1/karobaar/public_html/api.karobaarkart.com

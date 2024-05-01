@@ -28,5 +28,5 @@ jobs:
         with:
           target-server: https://api.karobaarkart.com
           remote-user: ${{ secrets.SERVER_USER }}
-          private-ssh-key: ${{ secrets.SSH_KEY }}
+          private-ssh-key: ${{ secrets.SSH_PRIVATE_KEY }}
           destination-path: ~/home1/karobaar/public_html/api.karobaarkart.com

@@ -106,6 +106,27 @@ function validateUser(user) {
     }
 }
 
+function validateWishlist(data) {
+    try {
+        const schema = Joi.object({
+            vehicleId: Joi.string()
+                .pattern(/^[a-fA-F0-9]{24}$/)
+                .required()
+                .messages({
+                    'any.required': 'Vehicle ID cannot be empty',
+                    'string.pattern.base': 'Vehicle ID should contain 24 characters'
+                })
+
+        });
+
+        return schema.validate(data);
+    } catch (error) {
+        return false;
+    }
+}
+
+
+
 
 function userLogin(mobile) {
     try {
@@ -209,5 +230,6 @@ function authenticateApplication(appSecretKey) {
 module.exports = {
     userSignUp,
     userLogin,
-    validateUser
+    validateUser,
+    validateWishlist
 };

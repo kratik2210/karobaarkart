@@ -93,6 +93,10 @@ const userSchema = new Schema({
         type: Boolean,
         default: false,
     },
+    deviceId: {
+        type: String,
+        default: null,
+    },
     timestamp: {
         type: Date,
         default: Date.now,

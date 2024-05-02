@@ -1,5 +1,5 @@
 const express = require('express');
-const { createVehicle, getVehicles } = require('../Controllers/vehicleController');
+const { createVehicle, getVehicles, vehiclesListing, singleVehicleBasedOnId } = require('../Controllers/vehicleController');
 const router = express.Router();
 const upload = require('../Utils/common/upload')
 const { authMiddleware } = require('../Utils/GlobalFunctions')
@@ -11,6 +11,10 @@ router.post('/add-vehicle', authMiddleware, upload.fields([
 ]), createVehicle)
 
 router.get('/retrive-vehicles', authMiddleware, getVehicles);
+
+router.get('/all-vehicle-listing', authMiddleware, vehiclesListing);
+
+router.get('/get-single-vehicle', authMiddleware, singleVehicleBasedOnId);
 
 
 module.exports = router;

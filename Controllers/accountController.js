@@ -5,7 +5,6 @@ const { errorCodes, API_RESP_CODES } = require("../Utils/common/error-codes");
 const { userSignUp, userLogin } = require("../Utils/common/validator");
 const { getMissingParams, generateOTP } = require("../Utils/common/sharedLib");
 const OTP = require("../Schema/otpSchema");
-const { default: mongoose } = require("mongoose");
 const AccountService = require("../Services/account-service");
 const { ErrorMessages } = require("../Utils/common/error-codes");
 const { errorHandler } = require("../Utils/common/api-middleware");
@@ -128,8 +127,10 @@ exports.accountRegister = async (req, res) => {
         return res
             .status(201)
             .json({ success: true, message: successMessage, data: user });
-    } catch (err) {
-        console.error("Error in accountRegister:", err);
+    } catch (error) {
+        if (error.code === 11000 && error.keyPattern && error.keyValue) {
+            return res.status(400).json({ success: false, message: 'Key already present in the database,Unique key required', error: error.keyValue });
+        }
         return res
             .status(500)
             .json({ success: false, message: "Internal server error.", data: null });

@@ -23,6 +23,10 @@ const errorCodes = {
         Text: 'User not registered',
         Value: 401,
     },
+    DELETED_SUCCESS: {
+        Text: 'Deleted successfully',
+        Value: 204,
+    },
 
 };
 
@@ -109,6 +113,38 @@ const API_RESP_CODES = {
     VEHICLE_EXIST: {
         status: 400,
         message: 'Vehicle already exists in wishlist',
+    },
+    VEHICLE_EXIST_INQUIRY: {
+        status: 400,
+        message: 'Vehicle already exists in inquiry',
+    },
+    VEHICLE_NOT_EXIST: {
+        status: 404,
+        message: 'Vehicle does not exist in wishlist',
+    },
+    WISHLIST_EMPTY: {
+        status: 404,
+        message: 'No vehicles added to wishlist',
+    },
+    INQUIRES_EMPTY: {
+        status: 404,
+        message: 'No vehicles added to inquires',
+    },
+    VEHICLE_LISTING_EMPTY: {
+        status: 404,
+        message: 'No listings found',
+    },
+    VEHICLE_LISTING_SUCCESS: {
+        status: 200,
+        message: 'All listings fetched',
+    },
+    VEHICLE_CANT_B_F: {
+        status: 404,
+        message: 'Vehicle cannot be found',
+    },
+    VEHICLE_CAN_BE_F: {
+        status: 200,
+        message: 'Vehicle found',
     },
 };
 

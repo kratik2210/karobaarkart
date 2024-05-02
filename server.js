@@ -33,7 +33,7 @@ const accountRouter = require('./Routers/accountRouter');
 const userRouter = require('./Routers/userRouter');
 const adminRouter = require('./Routers/adminRouter');
 const vehicleRouter = require('./Routers/vehicleRouter');
-const wishlistRouter = require('./Routers/wishlistRouter');
+const wishlistRouter = require('./Routers/wishlistInquiryRouter');
 
 app.use('/api', accountRouter);
 app.use('/user', userRouter);

@@ -25,9 +25,13 @@ const wishlistSchema = new mongoose.Schema({
         type: Date,
         default: Date.now,
     },
-    bucketStatus: {
-        type: String,
-        enum: ['wishlist', 'inquiry'],
+    wishlist: {
+        type: Boolean,
+        default: false,
+    },
+    inquiry: {
+        type: Boolean,
+        default: false,
     },
 });
 

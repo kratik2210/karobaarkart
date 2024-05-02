@@ -16,8 +16,6 @@ exports.generateRefreshToken = function (payload) {
    return JWT.sign(payload, process.env.JWT_SECRETKEY, { expiresIn: JWT_REFRESH_EXPIRY_IN_HOURS + 'd' });
 }
 
-
-
 // Password encrypt
 exports.passwordEncrypt = function (payload) {
    const salt = 10;

@@ -3,6 +3,7 @@ const { errorCodes, API_RESP_CODES } = require("../Utils/common/error-codes");
 const UserService = require("../Services/user-service");
 const { ErrorMessages } = require("../Utils/common/error-codes");
 const { errorHandler } = require("../Utils/common/api-middleware");
+const { validateUser } = require("../Utils/common/validator");
 
 exports.updateUser = _g.asyncMiddlewareController(async (req, res) => {
     try {

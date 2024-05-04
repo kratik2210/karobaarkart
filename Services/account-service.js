@@ -9,3 +9,12 @@ exports.verifyOTP = function (formData) {
         throw error;
     }
 }
+
+exports.adminLoginService = function (phoneNumber, email, password) {
+    try {
+        return AccountModel.adminSignIn(phoneNumber, email, password);
+    } catch (error) {
+        Logger.error(` ${new Date()} Authentication::verifyOTP:${error}`);
+        throw error;
+    }
+}

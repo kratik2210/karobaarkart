@@ -9,18 +9,18 @@ const brandSchema = new mongoose.Schema({
         required: true,
         unique: true,
     },
-    // createdBy: {
-    //     type: mongoose.Schema.Types.ObjectId,
-    //     ref: 'users',
-    // },
+    createdBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'users',
+    },
     createdAt: {
         type: Date,
         default: Date.now,
     },
-    // updatedBy: {
-    //     type: mongoose.Schema.Types.ObjectId,
-    //     ref: 'users',
-    // },
+    updatedBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'users',
+    },
     updatedAt: {
         type: Date,
         default: Date.now,

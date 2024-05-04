@@ -2,12 +2,13 @@ const Users = require("../Schema/usersSchema");
 const _g = require("../Utils/GlobalFunctions");
 const { expectedParams } = require("../Utils/common/constants");
 const { errorCodes, API_RESP_CODES } = require("../Utils/common/error-codes");
-const { userSignUp, userLogin } = require("../Utils/common/validator");
+const { userSignUp, userLogin, validateAdminLogin } = require("../Utils/common/validator");
 const { getMissingParams, generateOTP } = require("../Utils/common/sharedLib");
 const OTP = require("../Schema/otpSchema");
 const AccountService = require("../Services/account-service");
 const { ErrorMessages } = require("../Utils/common/error-codes");
 const { errorHandler } = require("../Utils/common/api-middleware");
+
 
 const getUserExistenceErrorMessage = (
     existUser,
@@ -116,8 +117,14 @@ exports.accountRegister = async (req, res) => {
         }
 
         const user = await Users.create(createdUser);
-        user.createdBy = user._id;
-        user.updatedBy = user._id;
+        if (req.user._id) {
+            user.createdBy = req.user._id
+            user.updatedBy = req.user._id
+        } else {
+            user.createdBy = user._id;
+            user.updatedBy = user._id;
+        }
+
         await user.save();
 
         const successMessage =
@@ -237,3 +244,42 @@ exports.OTPverification = _g.asyncMiddlewareController(async (req, res) => {
         errorHandler(res, error);
     }
 });
+
+
+exports.adminLogin = _g.asyncMiddlewareController(async (req, res) => {
+    try {
+        const { phoneNumber, email, password } = req.body;
+
+        const { error } = validateAdminLogin({
+            ...req.body
+        });
+
+        if (error) {
+
+            return res
+                .status(400)
+                .json({
+                    success: false,
+                    message: error.details[0].message,
+                    data: null,
+                });
+        }
+        const result = await AccountService.adminLoginService(phoneNumber, email, password);
+
+        let statusCode = errorCodes.SUCCESS.Value;
+        let message = result.message;
+        let data = result.data;
+
+        if (result.message === API_RESP_CODES.WRONG_PASSWORD) {
+            message = API_RESP_CODES.WRONG_PASSWORD.message;
+            statusCode = API_RESP_CODES.WRONG_PASSWORD.status;
+        }
+
+
+        res.status(statusCode)
+            .json({ success: result.status, message: message, data: result.data });
+    } catch (error) {
+        errorHandler(res, error);
+    }
+});
+

@@ -106,6 +106,28 @@ function validateUser(user) {
     }
 }
 
+
+function validateEditBrand(data) {
+    try {
+        const schema = Joi.object({
+            brandName: Joi.string().trim().min(3).max(50)
+                .regex(/^[a-zA-Z\s]+$/)
+                .message('Username must not be empty'),
+
+            description: Joi.string().allow(null).trim().message('Description must not be empty'),
+
+            brandLogo: Joi.string().allow(null),
+
+
+        });
+
+        return schema.validate(data, { allowUnknown: true });
+    } catch (error) {
+        return false;
+    }
+}
+
+
 function validateWishlist(data) {
     try {
         const schema = Joi.object({
@@ -124,6 +146,96 @@ function validateWishlist(data) {
         return false;
     }
 }
+
+function validateAdminLogin(data) {
+    try {
+        const schema = Joi.object({
+            // phoneNumber: Joi.string()
+            //     .length(10)
+            //     .pattern(/^[0-9]+$/)
+            //     .when(Joi.object({ email: Joi.string().empty('') }).unknown(), {
+            //         then: Joi.string().required(),
+            //         otherwise: Joi.string().empty('')
+            //     })
+            //     .messages({
+            //         'string.base': 'Phone number must be a string',
+            //         'string.length': 'Phone number must be exactly 10 digits',
+            //         'string.pattern.base': 'Phone number must contain only digits (0-9)'
+            //     }),
+
+            email: Joi.string()
+                .email({ minDomainSegments: 2 })
+                .when(Joi.object({ phoneNumber: Joi.string().empty('') }).unknown(), {
+                    then: Joi.string().required(),
+                    otherwise: Joi.string().empty('')
+                })
+                .messages({
+                    'string.email': 'Email must be a valid email address',
+                    'string.minDomainSegments': 'Email must have at least two domain segments',
+                }),
+
+            password: Joi.string().required().messages({
+                'any.required': 'Password is required',
+            })
+        });
+
+        return schema.validate(data);
+    } catch (error) {
+        return false;
+    }
+}
+
+function validateSearchWishlistInquiry(data) {
+    try {
+        const schema = Joi.object({
+            searchTerm: Joi.string()
+                .min(1)
+                .max(50)
+                .required()
+                .messages({
+                    'any.required': 'Search term is required',
+                    'string.empty': 'Search term cannot be empty',
+
+                }),
+            type: Joi.string()
+                .valid('wishlist', 'inquiry', 'Wishlist', 'Inquiry')
+                .messages({
+                    'any.only': 'Type must be wishlist or inquiry',
+                })
+        });
+
+        return schema.validate(data);
+    } catch (error) {
+        return false;
+    }
+}
+function validateSearchVehicle(data) {
+    try {
+        const schema = Joi.object({
+            searchTerm: Joi.string()
+                .min(1)
+                .max(50)
+                .required()
+                .messages({
+                    'any.required': 'Search term is required',
+                    'string.empty': 'Search term cannot be empty',
+
+                }),
+            type: Joi.string()
+                .valid('new', 'used', 'New', 'Used')
+                .messages({
+                    'any.only': 'Type must be used or new',
+                })
+        });
+
+        return schema.validate(data);
+    } catch (error) {
+        return false;
+    }
+}
+
+
+
 
 
 
@@ -231,5 +343,9 @@ module.exports = {
     userSignUp,
     userLogin,
     validateUser,
-    validateWishlist
+    validateWishlist,
+    validateSearchVehicle,
+    validateSearchWishlistInquiry,
+    validateAdminLogin,
+    validateEditBrand
 };

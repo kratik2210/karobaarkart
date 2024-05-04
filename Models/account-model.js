@@ -4,7 +4,7 @@ const Users = require("../Schema/usersSchema")
 const _g = require('../Utils/GlobalFunctions');
 const { JWT_EXPIRY_IN_HOURS, JWT_REFRESH_EXPIRY_IN_HOURS } = require("../Utils/common/constants");
 const LoginToken = require("../Schema/loginTokenSchema");
-const { ErrorMessages } = require('../Utils/common/error-codes')
+const { ErrorMessages, API_RESP_CODES } = require('../Utils/common/error-codes')
 
 exports.verifyOTP = async (formData) => {
     const session = await mongoose.startSession();
@@ -57,6 +57,81 @@ exports.verifyOTP = async (formData) => {
         returnResult.status = true;
         returnResult.message = ErrorMessages.AUTHENTICATION_SUCCESS;
         returnResult.data = { ...user._doc, token: jwtToken, refreshToken: jwtRefreshToken };
+        await session.commitTransaction();
+        return returnResult;
+    } catch (error) {
+        session.abortTransaction();
+        throw error;
+    } finally {
+        session.endSession();
+    }
+}
+
+
+exports.adminSignIn = async (phoneNumber, email, password) => {
+    const session = await mongoose.startSession();
+    session.startTransaction();
+    try {
+
+        let returnResult = { status: false, message: '', data: null };
+        const dateTimeNow = new Date();
+
+        const user = await Users.findOne(
+            { email: email }
+
+        ).select({
+            _id: 1,
+            userName: 1,
+            phoneNumber: 1,
+            email: 1,
+            password: 1
+        });
+
+        if (!user) {
+            returnResult.message = API_RESP_CODES.USER_NOT_FOUND;
+            return returnResult;
+        }
+
+
+
+        const isPasswordMatch = await _g.passwordDecrypt(user.password, password);
+
+        if (!isPasswordMatch) {
+            returnResult.message = API_RESP_CODES.WRONG_PASSWORD;
+            return returnResult;
+        }
+
+        const passwordRemoveFromUserObj = {
+            _id: user._id,
+            userName: user.userName,
+            phoneNumber: user.phoneNumber,
+            email: user.email,
+        }
+
+
+        const jwtToken = await _g.generateToken(passwordRemoveFromUserObj);
+        const jwtRefreshToken = await _g.generateRefreshToken(passwordRemoveFromUserObj);
+
+
+
+        /* Save token */
+        const currentDate = new Date();
+        currentDate.setHours(currentDate.getHours() + JWT_EXPIRY_IN_HOURS);
+        const currentDateRefresh = new Date();
+        currentDateRefresh.setHours(currentDate.getHours() + JWT_REFRESH_EXPIRY_IN_HOURS);
+
+        const loginToken = new LoginToken({
+            loginSessionId: user._id,
+            token: jwtToken,
+            refreshToken: jwtRefreshToken,
+            tokenExpiryTime: currentDate,
+            refreshTokenExpiryTime: currentDateRefresh,
+        })
+        await loginToken.save();
+
+        returnResult.status = true;
+        returnResult.message = ErrorMessages.AUTHENTICATION_SUCCESS;
+        returnResult.data = { ...passwordRemoveFromUserObj, token: jwtToken, refreshToken: jwtRefreshToken };
         await session.commitTransaction();
         return returnResult;
     } catch (error) {

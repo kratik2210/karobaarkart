@@ -130,6 +130,10 @@ const API_RESP_CODES = {
         status: 404,
         message: 'No vehicles added to inquires',
     },
+    SEARCH_EMPTY: {
+        status: 404,
+        message: 'No data to be found',
+    },
     VEHICLE_LISTING_EMPTY: {
         status: 404,
         message: 'No listings found',
@@ -145,6 +149,14 @@ const API_RESP_CODES = {
     VEHICLE_CAN_BE_F: {
         status: 200,
         message: 'Vehicle found',
+    },
+    USER_NOT_FOUND: {
+        status: 400,
+        message: 'User not found',
+    },
+    WRONG_PASSWORD: {
+        status: 401,
+        message: 'Wrong password entered',
     },
 };
 

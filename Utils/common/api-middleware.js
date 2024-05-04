@@ -10,7 +10,7 @@ exports.validateErrResp = function (res, err) {
 }
 
 // Common function to return api INTERNAL SERVER ERROR
-exports.internalErrResp = function (res, err, log) {
+const internalErrResp = function (res, err, log) {
     Logger.error(` ${new Date()} ${log}:${err}`);
     res.status(API_RESP_CODES.HTTP_SERVER_ERR.status).send({
         status: API_RESP_CODES.HTTP_SERVER_ERR.status,
@@ -20,10 +20,10 @@ exports.internalErrResp = function (res, err, log) {
 }
 
 // Common function to return api INTERNAL SERVER ERROR
-exports.apiValidResponse = function (res, _data) {
-    console.log("_data", _data)
+const apiValidResponse = function (res, _data) {
     res.status(API_RESP_CODES.HTTP_SUCCESS.status).send({
-        status: API_RESP_CODES.HTTP_SUCCESS.status,
+        // status: API_RESP_CODES.HTTP_SUCCESS.status,
+        success: true,
         message: API_RESP_CODES.HTTP_SUCCESS.message,
         data: _data,
     });
@@ -62,5 +62,7 @@ const errorHandler = function (res, error) {
 
 
 module.exports = {
-    errorHandler
+    errorHandler,
+    apiValidResponse,
+    internalErrResp
 };

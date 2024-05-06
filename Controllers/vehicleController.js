@@ -2,59 +2,131 @@ const Vehicle = require('../Schema/vehicleSchema');
 const vehicleService = require('../Services/vehicle-service')
 const _g = require('../Utils/GlobalFunctions');
 const { errorHandler } = require('../Utils/common/api-middleware');
-const { API_RESP_CODES, errorCodes } = require('../Utils/common/error-codes')
+const { API_RESP_CODES, errorCodes, ErrorMessages } = require('../Utils/common/error-codes');
+const { validateVehicle } = require('../Utils/common/validator');
+
+
+// exports.createVehicle = async (req, res) => {
+//     try {
+//         const { brandId, modelName, modelYear, modelNumber, modelPrice, modelLocation, description, mileage, fuelType, loadingCapacity, insurance, kmsDriven, category, inquireStatus, tyreCondition, fitness, bodyType } = req.body;
+//         const createdBy = req.user._id;
+//         const modelCoverImage = req.files.modelCoverImage ? req.files.modelCoverImage[0].path
+//             : null;
+
+//         const multiImageIds = [];
+
+//         if (req.files.modelMultiImages) {
+//             const modelMultiImages = req.files.modelMultiImages;
+//             for (const image of modelMultiImages) {
+//                 multiImageIds.push(image.path);
+//             }
+//         }
+
+//         const newVehicle = new Vehicle({
+//             brandId,
+//             modelName,
+//             modelYear,
+//             modelNumber,
+//             modelPrice,
+//             modelLocation,
+//             description,
+//             mileage,
+//             fuelType,
+//             loadingCapacity,
+//             insurance,
+//             kmsDriven,
+//             category,
+//             createdBy,
+//             modelCoverImage: modelCoverImage,
+//             modelMultiImages: multiImageIds,
+//             inquireStatus,
+//             tyreCondition,
+//             fitness,
+//             bodyType
+//         });
+
+//         const savedVehicle = await newVehicle.save();
+
+//         res.status(201).json({
+//             success: true,
+//             message: 'Vehicle created successfully',
+//             data: savedVehicle,
+//         });
+//     } catch (error) {
+//         if (error.code === 11000 && error.keyPattern && error.keyValue) {
+//             return res.status(400).json({ success: false, message: 'Key already present in the database,Unique key required', error: error.keyValue });
+//         }
+//         res.status(500).json({ success: false, message: 'Internal server error' });
+//     }
+// };
+
+
 exports.createVehicle = async (req, res) => {
     try {
         const { brandId, modelName, modelYear, modelNumber, modelPrice, modelLocation, description, mileage, fuelType, loadingCapacity, insurance, kmsDriven, category, inquireStatus, tyreCondition, fitness, bodyType } = req.body;
 
         const createdBy = req.user._id;
-        const modelCoverImage = req.files.modelCoverImage ? req.files.modelCoverImage[0].path
-            : null;
-
+        const updatedBy = req.user._id;
+        const modelCoverImage = req.files.modelCoverImage ? req.files.modelCoverImage[0].path : null;
         const multiImageIds = [];
 
         if (req.files.modelMultiImages) {
             const modelMultiImages = req.files.modelMultiImages;
             for (const image of modelMultiImages) {
-                multiImageIds.push(image.path);
+                multiImageIds.push({ img: image.path });
             }
         }
 
-        const newVehicle = new Vehicle({
-            brandId,
-            modelName,
-            modelYear,
-            modelNumber,
-            modelPrice,
-            modelLocation,
-            description,
-            mileage,
-            fuelType,
-            loadingCapacity,
-            insurance,
-            kmsDriven,
-            category,
-            createdBy,
+        const { error } = validateVehicle({
+            ...req.body,
             modelCoverImage: modelCoverImage,
-            modelMultiImages: multiImageIds,
-            inquireStatus,
-            tyreCondition,
-            fitness,
-            bodyType
+            multiImageIds: multiImageIds,
+            updatedBy,
+            createdBy
         });
 
-        const savedVehicle = await newVehicle.save();
+        if (error) {
+            return res
+                .status(400)
+                .json({
+                    success: false,
+                    message: error.details[0].message,
+                    data: null,
+                });
+        }
 
-        res.status(201).json({
-            success: true,
-            message: 'Vehicle created successfully',
-            data: savedVehicle,
-        });
+        const formData = {
+            ...req.body,
+            modelCoverImage: modelCoverImage,
+            multiImageIds: multiImageIds,
+            updatedBy,
+            createdBy
+        }
+
+        const result = await vehicleService.vehicleCreation(formData);
+
+
+        let statusCode = API_RESP_CODES.VEHICLE_CREATION.status;
+        let message = result.message;
+        let data = result.data;
+
+
+        if (result.message === ErrorMessages.BRAND_NOT_FOUND) {
+            statusCode = 404
+            message = ErrorMessages.BRAND_NOT_FOUND;
+        }
+
+
+        res.status(statusCode)
+            .json({ success: result.status, message: message, data: data });
+
+
     } catch (error) {
         if (error.code === 11000 && error.keyPattern && error.keyValue) {
             return res.status(400).json({ success: false, message: 'Key already present in the database,Unique key required', error: error.keyValue });
         }
-        res.status(500).json({ success: false, message: 'Internal server error' });
+
+        errorHandler(res, error);
     }
 };
 
@@ -64,12 +136,19 @@ exports.getVehicles = async (req, res) => {
 
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 6;
+        const category = req.query.category;
 
         const skip = (page - 1) * limit;
+        let vehicles = []
 
+        if (!category) {
+            vehicles = await Vehicle.find().populate('brandId').skip(skip)
+                .limit(limit);
+        } else {
+            vehicles = await Vehicle.find({ category: category }).populate('brandId').skip(skip)
+                .limit(limit);
 
-        const vehicles = await Vehicle.find().populate('brandId').skip(skip)
-            .limit(limit);
+        }
 
         res.status(200).json({
             success: true,
@@ -142,3 +221,35 @@ exports.singleVehicleBasedOnId = _g.asyncMiddlewareController(async (req, res) =
     }
 })
 
+
+exports.sellStatus = async (req, res) => {
+    try {
+        const { sellStatus, vehicleId } = req.query;
+        const userId = req.user._id
+        if (!sellStatus || !vehicleId) {
+            return res.status(400).json({ success: false, message: 'sellStatus and vehicleId are required' });
+        }
+
+        const vehicle = await Vehicle.findOneAndUpdate(
+            { _id: vehicleId },
+            {
+                sellStatus: sellStatus,
+                updatedBy: userId
+            },
+            { new: true }
+        ).populate('brandId');
+
+        if (!vehicle) {
+            return res.status(404).json({ success: false, message: 'Vehicle not found' });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: 'Status changed successfully',
+            data: vehicle,
+        });
+    } catch (error) {
+        console.error('Error fetching vehicles:', error);
+        res.status(500).json({ success: false, message: 'Internal server error' });
+    }
+};

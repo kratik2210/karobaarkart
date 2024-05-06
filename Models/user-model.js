@@ -69,3 +69,45 @@ exports.profileUpdate = async (formData, userId) => {
         session.endSession();
     }
 }
+
+exports.getAllUsersModel = async (userId, userType, isApproved) => {
+    const isApprovedBool = Boolean(isApproved);
+
+    return new Promise(async (resolve, reject) => {
+        try {
+            let getAllUsers
+            if (userType == '') {
+                getAllUsers = await Users.find().exec()
+                resolve(getAllUsers);
+            } else if (userType == 'user') {
+                getAllUsers = await Users.find({ userType: 'user' }).exec()
+                resolve(getAllUsers);
+            } else if (userType == 'dealer') {
+                getAllUsers = await Users.find({ userType: 'dealer', isApproved: isApproved })
+                resolve(getAllUsers);
+            } else {
+                reject()
+            }
+        } catch (error) {
+            reject(error);
+        }
+    });
+};
+
+
+exports.oneUserModel = async (userId) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+
+            let getOneUser = await Users.findById(userId).exec()
+            if (!getOneUser) {
+                resolve('User not found');
+            } else {
+                resolve(getOneUser);
+            }
+
+        } catch (error) {
+            reject(error);
+        }
+    });
+};

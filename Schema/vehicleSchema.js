@@ -24,7 +24,8 @@ const vehicleSchema = new Schema({
         type: String
     },
     modelMultiImages: [{
-        type: String
+        _id: { type: Schema.Types.ObjectId, auto: true },
+        img: { type: String }
     }],
     modelPrice: {
         type: Number
@@ -90,6 +91,11 @@ const vehicleSchema = new Schema({
     isActive: {
         type: Boolean,
         default: true
+    },
+    sellStatus: {
+        type: String,
+        enum: ['sell', 'used', 'auction'],
+        default: 'sell',
     },
     // inquireStatus: {
     //     type: String,

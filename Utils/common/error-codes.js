@@ -158,6 +158,10 @@ const API_RESP_CODES = {
         status: 401,
         message: 'Wrong password entered',
     },
+    VEHICLE_CREATION: {
+        status: 201,
+        message: 'Vehicle added successfully',
+    },
 };
 
 const ErrorMessages = {
@@ -179,6 +183,7 @@ const ErrorMessages = {
     OTP_INVALID: 'OTP_INVALID',
     OTP_EXPIRED: 'OTP_EXPIRED',
     USER_UPDATE_SUCCESS: 'USER UPDATED SUCCESSFULLY',
+    BRAND_NOT_FOUND: 'BRAND NOT FOUND',
 
 };
 

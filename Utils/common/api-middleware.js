@@ -1,12 +1,21 @@
 const Logger = require('../logger/log.config')
 const { API_RESP_CODES } = require('../common/error-codes')
+
 // Common function to return api PARAM VALIDATION ERROR
-exports.validateErrResp = function (res, err) {
-    res.status(API_RESP_CODES.HTTP_BAD_REQUEST.status).send({
-        status: API_RESP_CODES.APP_PARAM_ERROR.status,
-        message: API_RESP_CODES.APP_PARAM_ERROR.message,
-        data: { error: err },
-    });
+const validateErrResp = function (res, err, message) {
+    if (message) {
+        res.status(API_RESP_CODES.HTTP_BAD_REQUEST.status).send({
+            status: API_RESP_CODES.APP_PARAM_ERROR.status,
+            message: message,
+            data: { error: err },
+        });
+    } else {
+        res.status(API_RESP_CODES.HTTP_BAD_REQUEST.status).send({
+            status: API_RESP_CODES.APP_PARAM_ERROR.status,
+            message: API_RESP_CODES.APP_PARAM_ERROR.message,
+            data: { error: err },
+        });
+    }
 }
 
 // Common function to return api INTERNAL SERVER ERROR
@@ -20,13 +29,23 @@ const internalErrResp = function (res, err, log) {
 }
 
 // Common function to return api INTERNAL SERVER ERROR
-const apiValidResponse = function (res, _data) {
-    res.status(API_RESP_CODES.HTTP_SUCCESS.status).send({
-        // status: API_RESP_CODES.HTTP_SUCCESS.status,
-        success: true,
-        message: API_RESP_CODES.HTTP_SUCCESS.message,
-        data: _data,
-    });
+const apiValidResponse = function (res, _data, message) {
+    if (message) {
+        res.status(API_RESP_CODES.HTTP_SUCCESS.status).send({
+            // status: API_RESP_CODES.HTTP_SUCCESS.status,
+            success: true,
+            message: message,
+            data: _data,
+        });
+    } else {
+        res.status(API_RESP_CODES.HTTP_SUCCESS.status).send({
+            // status: API_RESP_CODES.HTTP_SUCCESS.status,
+            success: true,
+            message: API_RESP_CODES.HTTP_SUCCESS.message,
+            data: _data,
+        });
+    }
+
 }
 
 // Common function to return api INTERNAL SERVER ERROR
@@ -64,5 +83,6 @@ const errorHandler = function (res, error) {
 module.exports = {
     errorHandler,
     apiValidResponse,
-    internalErrResp
+    internalErrResp,
+    validateErrResp
 };

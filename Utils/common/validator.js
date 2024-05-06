@@ -339,6 +339,38 @@ function authenticateApplication(appSecretKey) {
     }
 }
 
+
+function validateVehicle(vehicle) {
+    try {
+        const schema = Joi.object({
+            brandId: Joi.string().required(),
+            modelName: Joi.string().trim().min(3).max(50).required(),
+            modelYear: Joi.number().required().integer().min(1900).max(new Date().getFullYear()),
+            modelNumber: Joi.number().required(),
+            modelCoverImage: Joi.string().allow(null),
+            modelMultiImages: Joi.array().items(Joi.string().allow(null)),
+            modelPrice: Joi.number().allow(null),
+            modelLocation: Joi.string().allow(null),
+            modelRating: Joi.number().allow(null),
+            description: Joi.string().allow(null),
+            mileage: Joi.number().allow(null),
+            fuelType: Joi.string().valid('petrol', 'diesel').allow(null),
+            loadingCapacity: Joi.string().allow(null),
+            insurance: Joi.string().valid('valid', 'expired').allow(null),
+            kmsDriven: Joi.number().allow(null),
+            category: Joi.string().valid('used', 'new').default('used').required(),
+            tyreCondition: Joi.string().valid('good', 'bad').allow(null),
+            fitness: Joi.string().allow(null),
+            bodyType: Joi.string().allow(null),
+        });
+
+        return schema.validate(vehicle, { allowUnknown: true });
+    } catch (error) {
+        return false;
+    }
+}
+
+
 module.exports = {
     userSignUp,
     userLogin,
@@ -347,5 +379,6 @@ module.exports = {
     validateSearchVehicle,
     validateSearchWishlistInquiry,
     validateAdminLogin,
-    validateEditBrand
+    validateEditBrand,
+    validateVehicle
 };

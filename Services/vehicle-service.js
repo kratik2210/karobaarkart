@@ -1,6 +1,14 @@
 const Logger = require("../Utils/logger/log.config");
 const vehicleModel = require('../Models/vehicle-model')
 
+exports.vehicleCreation = function (formData) {
+    try {
+        return vehicleModel.createVehicle(formData);
+    } catch (error) {
+        Logger.error(` ${new Date()} Authentication::vehicleCreation:${error}`);
+        throw error;
+    }
+}
 exports.vehicleListingService = function (userId, pagination) {
     try {
         return vehicleModel.getAllVehicleListing(userId, pagination);

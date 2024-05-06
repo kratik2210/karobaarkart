@@ -63,6 +63,11 @@ const userSchema = new Schema({
         required: true,
     },
     ...dealerSchemaFields,
+    // ...(this.userType === 'dealer' ? { isApproved: { type: Boolean, default: false } } : {}),
+    isApproved: {
+        type: Boolean,
+        default: false
+    },
     createdBy: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',

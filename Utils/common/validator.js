@@ -33,9 +33,10 @@ function userSignUp(user) {
 
             bankAccName: Joi.string().allow(null).default(null).trim(),
 
-            ifscCode: Joi.string().allow(null).default(null).trim()
-                .regex(/^\d{11}$/)
-                .message('IFSC code must be 11 digits'),
+            ifscCode: Joi.string().allow(null).trim()
+                .alphanum()
+                .length(11)
+                .message('IFSC code must be 11 alphanumeric characters'),
 
             docImage: Joi.string().allow(null).default(null),
         });
@@ -94,8 +95,9 @@ function validateUser(user) {
             bankAccName: Joi.string().allow(null).trim(),
 
             ifscCode: Joi.string().allow(null).trim()
-                .regex(/^\d{11}$/)
-                .message('IFSC code must be 11 digits'),
+                .alphanum()
+                .length(11)
+                .message('IFSC code must be 11 alphanumeric characters'),
 
             docImage: Joi.string().allow(null),
         });

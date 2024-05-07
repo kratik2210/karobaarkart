@@ -8,7 +8,7 @@ const LOGIN_OTP_EXPIRY_IN_MINUTES = 5;
 const expectedParams = {
     /* {route}+{method} */
     authenticateSignUpDealer: {
-        required: ['userName', 'address', 'phoneNumber', 'email', 'userType', 'firmName', 'docNo', 'bankAccNo', 'bankAccName', 'ifscCode', 'businessProof', 'docImage'],
+        required: ['userName', 'address', 'phoneNumber', 'email', 'userType', 'firmName', 'bankAccNo', 'bankAccName', 'ifscCode', 'businessProof', 'docImage'],
         optional: [],
     },
     authenticateSignUpUser: {

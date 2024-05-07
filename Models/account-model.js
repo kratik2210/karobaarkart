@@ -19,7 +19,8 @@ exports.verifyOTP = async (formData) => {
             _id: 1,
             userName: 1,
             phoneNumber: 1,
-            email: 1
+            email: 1,
+            userType: 1
         })
         if (!user) {
             returnResult.message = ErrorMessages.OTP_EXPIRED;

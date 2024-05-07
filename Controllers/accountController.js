@@ -117,7 +117,7 @@ exports.accountRegister = async (req, res) => {
         }
 
         const user = await Users.create(createdUser);
-        if (req.user._id) {
+        if (req.user?._id) {
             user.createdBy = req.user._id
             user.updatedBy = req.user._id
         } else {
@@ -135,6 +135,7 @@ exports.accountRegister = async (req, res) => {
             .status(201)
             .json({ success: true, message: successMessage, data: user });
     } catch (error) {
+        console.log("🚀 ~ exports.accountRegister= ~ error:", error)
         if (error.code === 11000 && error.keyPattern && error.keyValue) {
             return res.status(400).json({ success: false, message: 'Key already present in the database,Unique key required', error: error.keyValue });
         }

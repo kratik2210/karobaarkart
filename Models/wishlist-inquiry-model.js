@@ -1,5 +1,6 @@
 const { default: mongoose } = require("mongoose");
 const Wishlist = require("../Schema/wishlistInquirySchema")
+const Vehicle = require("../Schema/vehicleSchema")
 const _g = require('../Utils/GlobalFunctions');
 const { API_RESP_CODES } = require('../Utils/common/error-codes')
 
@@ -17,6 +18,14 @@ exports.addingToWishlist = async (formData, userId) => {
         const {
             vehicleId
         } = formData;
+
+
+        const existingVehicle = await Vehicle.findOne({ vehicleId });
+
+        if (!existingVehicle) {
+            return { status: false, message: 'Requested vehicle is not present', data: null };
+        }
+
 
         const existingWishlistItem = await Wishlist.findOne({ userId, vehicleId, wishlist: true, });
 

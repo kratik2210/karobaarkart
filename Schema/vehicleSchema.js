@@ -16,10 +16,10 @@ const vehicleSchema = new Schema({
         type: Number,
         required: true
     },
-    modelNumber: {
-        type: Number,
-        unique: true
-    },
+    // modelNumber: {
+    //     type: Number,
+    //     unique: true
+    // },
     modelCoverImage: {
         type: String
     },
@@ -50,8 +50,7 @@ const vehicleSchema = new Schema({
         type: String,
     },
     insurance: {
-        type: String,
-        enum: ['valid', 'expired']
+        type: Boolean
     },
     kmsDriven: {
         type: Number
@@ -64,13 +63,11 @@ const vehicleSchema = new Schema({
     },
     tyreCondition: {
         type: String,
-        enum: ['good', 'bad']
+        enum: ['25%', '50%', '75%', '100%'],
+
     },
     fitness: {
-        type: String,
-    },
-    bodyType: {
-        type: String,
+        type: Boolean,
     },
     createdBy: {
         type: Schema.Types.ObjectId,
@@ -97,10 +94,13 @@ const vehicleSchema = new Schema({
         enum: ['sell', 'used', 'auction'],
         default: 'sell',
     },
-    // inquireStatus: {
-    //     type: String,
-    //     enum: ['sold', 'unsold', 'auction']
-    // }
+    bodyType: {
+        enum: ['chassis', 'halfbody', 'fullbody', 'highbuild', 'container'],
+        type: String
+    },
+    contactNumber: {
+        type: Number
+    }
 });
 
 const Vehicle = mongoose.model('Vehicle', vehicleSchema);

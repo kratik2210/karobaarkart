@@ -12,7 +12,8 @@ exports.createVehicle = async (formData) => {
 
         const {
             brandId, modelName, modelYear, modelNumber, modelPrice, modelLocation, description, mileage, fuelType, loadingCapacity, insurance, kmsDriven, category, inquireStatus, tyreCondition, fitness, bodyType, modelCoverImage, multiImageIds, createdBy,
-            updatedBy
+            updatedBy, contactNumber
+
         } = formData;
 
 
@@ -25,18 +26,22 @@ exports.createVehicle = async (formData) => {
             return returnResult;
         }
 
+        const fitnessBoolean = fitness == 'valid' ? true : false
+
+        const insuranceBoolean = insurance == 'valid' ? true : false
+
         const newVehicle = new Vehicle({
             brandId,
             modelName,
             modelYear,
-            modelNumber,
+            // modelNumber,
             modelPrice,
             modelLocation,
             description,
             mileage,
             fuelType,
             loadingCapacity,
-            insurance,
+            insurance: insuranceBoolean,
             kmsDriven,
             category,
             createdBy,
@@ -44,9 +49,10 @@ exports.createVehicle = async (formData) => {
             modelMultiImages: multiImageIds,
             inquireStatus,
             tyreCondition,
-            fitness,
+            fitness: fitnessBoolean,
             bodyType,
-            updatedBy
+            updatedBy,
+            contactNumber
         });
 
         const savedVehicle = await newVehicle.save();

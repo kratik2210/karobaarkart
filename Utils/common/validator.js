@@ -348,7 +348,7 @@ function validateVehicle(vehicle) {
             brandId: Joi.string().required(),
             modelName: Joi.string().trim().min(3).max(50).required(),
             modelYear: Joi.number().required().integer().min(1900).max(new Date().getFullYear()),
-            modelNumber: Joi.number().required(),
+            // modelNumber: Joi.number().required(),
             modelCoverImage: Joi.string().allow(null),
             modelMultiImages: Joi.array().items(Joi.string().allow(null)),
             modelPrice: Joi.number().allow(null),
@@ -358,12 +358,12 @@ function validateVehicle(vehicle) {
             mileage: Joi.number().allow(null),
             fuelType: Joi.string().valid('petrol', 'diesel').allow(null),
             loadingCapacity: Joi.string().allow(null),
-            insurance: Joi.string().valid('valid', 'expired').allow(null),
+            insurance: Joi.string().valid('valid', 'notvalid').allow(null),
             kmsDriven: Joi.number().allow(null),
             category: Joi.string().valid('used', 'new').default('used').required(),
-            tyreCondition: Joi.string().valid('good', 'bad').allow(null),
-            fitness: Joi.string().allow(null),
-            bodyType: Joi.string().allow(null),
+            tyreCondition: Joi.string().valid('25%', '50%', '75%', '100%').allow(null),
+            fitness: Joi.string().valid('valid', 'notvalid').allow(null),
+            bodyType: Joi.string().valid('chassis', 'halfbody', 'fullbody', 'highbuild', 'container').allow(null),
         });
 
         return schema.validate(vehicle, { allowUnknown: true });

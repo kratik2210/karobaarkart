@@ -1,7 +1,8 @@
 const express = require('express');
-const { createVehicle, getVehicles, vehiclesListing, singleVehicleBasedOnId, sellStatus } = require('../Controllers/vehicleController');
+const { createVehicle, getVehicles, vehiclesListing, singleVehicleBasedOnId, sellStatus, importVehiclePricing, postData, updateData, readMany, getAllModelsRelatedToBrands } = require('../Controllers/vehicleController');
 const router = express.Router();
 const upload = require('../Utils/common/upload')
+const localUpload = require('../Utils/common/localUpload')
 const { authMiddleware } = require('../Utils/GlobalFunctions')
 
 
@@ -18,5 +19,15 @@ router.get('/get-single-vehicle', authMiddleware, singleVehicleBasedOnId);
 
 router.put('/sell-status', authMiddleware, sellStatus);
 
+router.put('/import', (req, res, next) => {
+    next();
+}, localUpload.fields([{ name: 'excelFile', maxCount: 1 }]), (req, res, next) => {
+    next();
+}, importVehiclePricing);
+
+router.post('/post-data', postData);
+router.put('/update-data', updateData);
+router.get('/read-many', readMany);
+router.get('/models-related-brands', getAllModelsRelatedToBrands);
 
 module.exports = router;

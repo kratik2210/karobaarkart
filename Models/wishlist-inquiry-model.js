@@ -20,7 +20,7 @@ exports.addingToWishlist = async (formData, userId) => {
         } = formData;
 
 
-        const existingVehicle = await Vehicle.findOne({ vehicleId });
+        const existingVehicle = await Vehicle.findOne({ _id: vehicleId });
 
         if (!existingVehicle) {
             return { status: false, message: 'Requested vehicle is not present', data: null };
@@ -117,6 +117,7 @@ exports.getAllWishlist = async (userId) => {
         if (!isValidObjectId) {
             return { status: false, message: 'Invalid user ID format', data: null };
         }
+
 
         const allWishlistItems = await Wishlist.find({ userId, wishlist: true }).populate('vehicleId');
 

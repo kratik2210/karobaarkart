@@ -1,6 +1,7 @@
 const { default: mongoose } = require("mongoose");
 const Vehicle = require("../Schema/vehicleSchema")
 const Brands = require('../Schema/brandSchema');
+const VehiclePricing = require('../Schema/vehiclePricingSchema');
 const _g = require('../Utils/GlobalFunctions');
 const { API_RESP_CODES, ErrorMessages } = require('../Utils/common/error-codes')
 
@@ -11,7 +12,7 @@ exports.createVehicle = async (formData) => {
     try {
 
         const {
-            brandId, modelName, modelYear, modelNumber, modelPrice, modelLocation, description, mileage, fuelType, loadingCapacity, insurance, kmsDriven, category, inquireStatus, tyreCondition, fitness, bodyType, modelCoverImage, multiImageIds, createdBy,
+            brandId, modelName, modelYear, modelNumber, modelPrice, modelLocation, description, mileage, fuelType, loadingCapacity, insurance, kmsDriven, category, inquireStatus, tyreCondition, fitness, bodyType, modelCoverImage, multiImageIds, createdBy, seatingCapacity,
             updatedBy, contactNumber
 
         } = formData;
@@ -34,7 +35,6 @@ exports.createVehicle = async (formData) => {
             brandId,
             modelName,
             modelYear,
-            // modelNumber,
             modelPrice,
             modelLocation,
             description,
@@ -52,10 +52,40 @@ exports.createVehicle = async (formData) => {
             fitness: fitnessBoolean,
             bodyType,
             updatedBy,
-            contactNumber
+            contactNumber,
+            seatingCapacity
         });
 
+
         const savedVehicle = await newVehicle.save();
+
+        const vehiclePricing = await VehiclePricing.findOne({ _id: modelName });
+
+        if (!vehiclePricing) {
+            returnResult.message = ErrorMessages.VEHICLE_PRICING_NOT_FOUND;
+            return returnResult;
+        }
+
+        let adjustedPrice = vehiclePricing[savedVehicle?.modelYear];
+
+
+
+        adjustedPrice -= vehiclePricing[savedVehicle?.insurance == true ? `insuranceValid` : `insuranceInValid`];
+
+        adjustedPrice -= vehiclePricing[savedVehicle.fitness == true ? `fitnessValid` : `fitnessInValid`];
+
+        if (savedVehicle?.bodyType) {
+            adjustedPrice -= vehiclePricing[savedVehicle?.bodyType];
+        }
+
+        if (savedVehicle?.tyreCondition) {
+            adjustedPrice -= vehiclePricing[`tyre-${savedVehicle?.tyreCondition}`];
+        }
+
+        savedVehicle.modelPrice = Number(adjustedPrice);
+        await savedVehicle.save();
+
+
 
         returnResult.status = true;
         returnResult.message = API_RESP_CODES.VEHICLE_CREATION.message;

@@ -9,7 +9,8 @@ const vehicleSchema = new Schema({
         required: true
     },
     modelName: {
-        type: String,
+        type: Schema.Types.ObjectId,
+        ref: 'VehiclePricing',
         required: true
     },
     modelYear: {
@@ -48,6 +49,9 @@ const vehicleSchema = new Schema({
     },
     loadingCapacity: {
         type: String,
+    },
+    seatingCapacity: {
+        type: Number,
     },
     insurance: {
         type: Boolean
@@ -100,7 +104,10 @@ const vehicleSchema = new Schema({
     },
     contactNumber: {
         type: Number
-    }
+    },
+    // calculatedPrice: {
+    //     type: Number
+    // }
 });
 
 const Vehicle = mongoose.model('Vehicle', vehicleSchema);

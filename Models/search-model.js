@@ -159,7 +159,6 @@ exports.filteringByPriceRange = async (minPrice, maxPrice, userId) => {
             return { status: false, message: 'Invalid user ID format', data: null };
         }
 
-        // const typeSelection = type.toLowerCase() == 'used' ? { category: 'used' } : type.toLowerCase() == 'new' ? { category: 'new' } : {};
 
 
         const query = { modelPrice: { $gte: minPrice, $lte: maxPrice } };

@@ -7,6 +7,7 @@ const { errorHandler } = require('../Utils/common/api-middleware');
 const { API_RESP_CODES, errorCodes, ErrorMessages } = require('../Utils/common/error-codes');
 const { validateVehicle } = require('../Utils/common/validator');
 const Brand = require("../Schema/brandSchema");
+const Wishlist = require("../Schema/wishlistInquirySchema")
 
 // exports.createVehicle = async (req, res) => {
 //     try {
@@ -65,7 +66,7 @@ const Brand = require("../Schema/brandSchema");
 
 exports.createVehicle = async (req, res) => {
     try {
-        const { brandId, modelName, modelYear, modelNumber, modelPrice, modelLocation, description, mileage, fuelType, loadingCapacity, insurance, kmsDriven, category, inquireStatus, tyreCondition, fitness, bodyType } = req.body;
+        const { brandId, modelName, modelYear, modelPrice, modelLocation, description, mileage, fuelType, loadingCapacity, insurance, kmsDriven, category, inquireStatus, tyreCondition, fitness, bodyType } = req.body;
 
         const createdBy = req.user._id;
         const updatedBy = req.user._id;
@@ -133,6 +134,51 @@ exports.createVehicle = async (req, res) => {
 };
 
 
+// exports.getVehicles = async (req, res) => {
+//     try {
+//         const page = parseInt(req.query.page) || 1;
+//         const limit = parseInt(req.query.limit) || 6;
+//         const category = req.query.category;
+//         const sellStatus = req.query.sellStatus;
+
+//         const skip = (page - 1) * limit;
+//         let query = {};
+
+//         if (category) {
+//             query.category = category;
+//         }
+//         if (sellStatus) {
+//             query.sellStatus = sellStatus;
+//         }
+
+//         let vehicles;
+//         let totalCount;
+
+//         if (Object.keys(query).length === 0) {
+//             vehicles = await Vehicle.find().populate('brandId').skip(skip).limit(limit);
+//             totalCount = await Vehicle.countDocuments();
+
+//         } else {
+//             vehicles = await Vehicle.find(query).populate('brandId').skip(skip).limit(limit);
+//             totalCount = await Vehicle.countDocuments(query);
+
+//         }
+
+//         const totalPages = Math.ceil(totalCount / limit);
+
+
+//         res.status(200).json({
+//             success: true,
+//             message: 'Vehicles retrieved successfully',
+//             data: vehicles,
+//             totalPages: totalPages,
+//         });
+//     } catch (error) {
+//         console.error('Error fetching vehicles:', error);
+//         res.status(500).json({ success: false, message: 'Internal server error' });
+//     }
+// };
+
 exports.getVehicles = async (req, res) => {
     try {
         const page = parseInt(req.query.page) || 1;
@@ -154,17 +200,32 @@ exports.getVehicles = async (req, res) => {
         let totalCount;
 
         if (Object.keys(query).length === 0) {
-            vehicles = await Vehicle.find().populate('brandId').skip(skip).limit(limit);
+            vehicles = await Vehicle.find().populate('brandId').populate({
+                path: 'modelName',
+                select: 'modelName _id',
+            }).skip(skip).limit(limit);
             totalCount = await Vehicle.countDocuments();
-
         } else {
-            vehicles = await Vehicle.find(query).populate('brandId').skip(skip).limit(limit);
+            vehicles = await Vehicle.find(query).populate('brandId').populate({
+                path: 'modelName',
+                select: 'modelName _id',
+            }).skip(skip).limit(limit);
             totalCount = await Vehicle.countDocuments(query);
-
         }
 
         const totalPages = Math.ceil(totalCount / limit);
 
+        // Fetch wishlist items for the current user
+        const wishlistItems = await Wishlist.find({ createdBy: req.user._id });
+
+        // Map vehicleIds from wishlistItems
+        const vehicleIdsInWishlist = wishlistItems.map(item => item.vehicleId.toString());
+
+        // Loop through vehicles and mark those in the user's wishlist
+        vehicles = vehicles.map(vehicle => ({
+            ...vehicle.toObject(), // Convert Mongoose document to plain JavaScript object
+            wishlist: vehicleIdsInWishlist.includes(vehicle._id.toString()) // Check if the vehicle is in the user's wishlist
+        }));
 
         res.status(200).json({
             success: true,
@@ -586,6 +647,8 @@ exports.getAllModelsRelatedToBrands = async (req, res) => {
         res.status(400).json({ success: false, error: error.message || error });
     }
 };
+
+
 
 
 

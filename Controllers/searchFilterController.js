@@ -92,7 +92,7 @@ exports.searchVehicles = _g.asyncMiddlewareController(async (req, res) => {
 exports.filterBrand = _g.asyncMiddlewareController(async (req, res) => {
     try {
         const userId = req.user._id;
-        const brandId = req.body.brandId
+        const brandId = req.query.brandId
         const result = await SearchService.filterBrandService(userId, req.query.type, brandId);
 
         let statusCode = errorCodes.SUCCESS.Value;
@@ -117,8 +117,8 @@ exports.filterBrand = _g.asyncMiddlewareController(async (req, res) => {
 exports.filterPriceRange = _g.asyncMiddlewareController(async (req, res) => {
     try {
         const userId = req.user._id;
-        const minPrice = req.body.minPrice
-        const maxPrice = req.body.maxPrice
+        const minPrice = req.query.minPrice
+        const maxPrice = req.query.maxPrice
         const result = await SearchService.filterByPriceRangeService(minPrice, maxPrice, userId);
 
         let statusCode = errorCodes.SUCCESS.Value;
@@ -142,7 +142,7 @@ exports.filterPriceRange = _g.asyncMiddlewareController(async (req, res) => {
 
 exports.filterVehicles = async (req, res) => {
     try {
-        const { brandId, fuelType, seatingCapacity, loadingCapacity, minPrice, maxPrice } = req.body;
+        const { brandId, fuelType, seatingCapacity, loadingCapacity, minPrice, maxPrice } = req.query;
         const { category } = req.query
 
         let returnResult = { status: false, message: '', data: null };
@@ -167,7 +167,7 @@ exports.filterVehicles = async (req, res) => {
         const filteredVehicles = await Vehicle.find(query).populate('brandId').exec();
 
         if (filteredVehicles.length === 0) {
-            return res.status(404).json({ status: false, message: 'No vehicles found with the specified filters', data: null });
+            return res.status(404).json({ status: true, message: 'No vehicles found with the specified filters', data: null });
         }
 
         return res.status(200).json({ status: true, message: 'Filtered successfully', data: filteredVehicles });

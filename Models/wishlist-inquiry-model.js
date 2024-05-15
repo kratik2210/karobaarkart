@@ -119,7 +119,21 @@ exports.getAllWishlist = async (userId) => {
         }
 
 
-        const allWishlistItems = await Wishlist.find({ userId, wishlist: true }).populate('vehicleId');
+        const allWishlistItems = await Wishlist.find({ userId, wishlist: true }).populate('vehicleId').populate({
+            path: 'vehicleId',
+            populate: {
+                path: 'brandId',
+                model: 'Brand'
+            }
+        })
+            .populate({
+                path: 'vehicleId',
+                populate: {
+                    path: 'modelName',
+                    model: 'VehiclePricing',
+                    select: 'modelName _id',
+                }
+            });
 
         if (!allWishlistItems) {
             return { status: false, message: API_RESP_CODES.WISHLIST_EMPTY.message, data: null };
@@ -203,7 +217,23 @@ exports.getAllInquires = async (userId) => {
             return { status: false, message: 'Invalid user ID format', data: null };
         }
 
-        const allInquiryItems = await Wishlist.find({ userId, inquiry: true }).populate('vehicleId');
+        const allInquiryItems = await Wishlist.find({ userId, inquiry: true }).populate({
+            path: 'vehicleId',
+            populate: {
+                path: 'brandId',
+                model: 'Brand'
+            }
+        })
+            .populate({
+                path: 'vehicleId',
+                populate: {
+                    path: 'modelName',
+                    model: 'VehiclePricing',
+                    select: 'modelName _id',
+                }
+            });
+
+
 
         if (!allInquiryItems) {
             return { status: false, message: API_RESP_CODES.INQUIRES_EMPTY.message, data: null };

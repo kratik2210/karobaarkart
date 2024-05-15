@@ -123,8 +123,10 @@ exports.getAllVehicleListing = async (userId, pagination) => {
             return { status: false, message: 'Invalid user ID format', data: null };
         }
 
-        const allVehicleListings = await Vehicle.find({ createdBy: userId }).populate('brandId').skip(skip)
-            .limit(limit);
+        const allVehicleListings = await Vehicle.find({ createdBy: userId }).populate('brandId').populate({
+            path: 'modelName',
+            select: 'modelName _id',
+        });
 
         if (!allVehicleListings) {
             return { status: false, message: API_RESP_CODES.VEHICLE_LISTING_EMPTY.message, data: null };

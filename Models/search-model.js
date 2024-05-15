@@ -37,7 +37,7 @@ exports.searchingWishlistInquiry = async (searchTerm, userId, type) => {
         );
 
         if (filteredResults.length == 0) {
-            return { status: false, message: API_RESP_CODES.SEARCH_EMPTY.message, data: null };
+            return { status: true, message: API_RESP_CODES.SEARCH_EMPTY.message, data: null };
         }
 
         await session.commitTransaction();
@@ -84,7 +84,7 @@ exports.searchingVehicles = async (searchTerm, userId, type) => {
         );
 
         if (filteredResults.length == 0) {
-            return { status: false, message: API_RESP_CODES.SEARCH_EMPTY.message, data: null };
+            return { status: true, message: API_RESP_CODES.SEARCH_EMPTY.message, data: null };
         }
 
         await session.commitTransaction();
@@ -125,7 +125,7 @@ exports.filterByBrand = async (userId, type, brandId) => {
 
 
         if (allSearchResult.length == 0) {
-            return { status: false, message: API_RESP_CODES.SEARCH_EMPTY.message, data: null };
+            return { status: true, message: API_RESP_CODES.SEARCH_EMPTY.message, data: null };
         }
 
         await session.commitTransaction();
@@ -163,11 +163,17 @@ exports.filteringByPriceRange = async (minPrice, maxPrice, userId) => {
 
         const query = { modelPrice: { $gte: minPrice, $lte: maxPrice } };
 
-        const allSearchResult = await Vehicle.find(query).populate('brandId').exec();
+        const allSearchResult = await Vehicle.find(query).populate('brandId').populate({
+
+            path: 'modelName',
+
+            select: 'modelName _id',
+
+        }).exec();
 
 
         if (allSearchResult.length == 0) {
-            return { status: false, message: API_RESP_CODES.SEARCH_EMPTY.message, data: null };
+            return { status: true, message: API_RESP_CODES.SEARCH_EMPTY.message, data: null };
         }
 
         await session.commitTransaction();

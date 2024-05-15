@@ -76,10 +76,13 @@ exports.searchingVehicles = async (searchTerm, userId, type) => {
 
         const query = { ...typeSelection };
 
-        const allSearchResult = await Vehicle.find(query).populate('brandId').exec();
+        const allSearchResult = await Vehicle.find(query).populate('brandId').populate({
+            path: 'modelName',
+            select: 'modelName _id',
+        }).exec();
 
         const filteredResults = allSearchResult.filter(item =>
-            item.modelName.match(new RegExp(searchTerm, 'i')) ||
+            item.modelName.modelName.match(new RegExp(searchTerm, 'i')) ||
             item.brandId.brandName.match(new RegExp(searchTerm, 'i'))
         );
 
@@ -121,7 +124,10 @@ exports.filterByBrand = async (userId, type, brandId) => {
         // const typeSelection = type.toLowerCase()
 
 
-        let allSearchResult = await Vehicle.find({ brandId: brandId }).populate('brandId').exec();
+        let allSearchResult = await Vehicle.find({ brandId: brandId }).populate('brandId').populate({
+            path: 'modelName',
+            select: 'modelName _id',
+        }).exec();
 
 
         const wishlistItems = await Wishlist.find({ userId: userId });
@@ -181,7 +187,10 @@ exports.filteringByPriceRange = async (minPrice, maxPrice, userId, category) => 
 
         const query = { modelPrice: { $gte: minPrice, $lte: maxPrice }, category: category };
 
-        let allSearchResult = await Vehicle.find(query)
+        let allSearchResult = await Vehicle.find(query).populate('brandId').populate({
+            path: 'modelName',
+            select: 'modelName _id',
+        })
 
         const wishlistItems = await Wishlist.find({ userId: userId });
 

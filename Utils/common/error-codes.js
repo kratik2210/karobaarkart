@@ -25,7 +25,7 @@ const errorCodes = {
     },
     DELETED_SUCCESS: {
         Text: 'Deleted successfully',
-        Value: 204,
+        Value: 200,
     },
 
 };
@@ -123,15 +123,15 @@ const API_RESP_CODES = {
         message: 'Vehicle does not exist in wishlist',
     },
     WISHLIST_EMPTY: {
-        status: 404,
+        status: 200,
         message: 'No vehicles added to wishlist',
     },
     INQUIRES_EMPTY: {
-        status: 404,
+        status: 200,
         message: 'No vehicles added to inquires',
     },
     SEARCH_EMPTY: {
-        status: 404,
+        status: 200,
         message: 'No data to be found',
     },
     VEHICLE_LISTING_EMPTY: {

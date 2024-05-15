@@ -121,7 +121,25 @@ exports.filterByBrand = async (userId, type, brandId) => {
         // const typeSelection = type.toLowerCase()
 
 
-        const allSearchResult = await Vehicle.find({ brandId: brandId }).populate('brandId').exec();
+        let allSearchResult = await Vehicle.find({ brandId: brandId }).populate('brandId').exec();
+
+
+        const wishlistItems = await Wishlist.find({ userId: userId });
+
+        // Create a map to store vehicleId-wishlistStatus pairs
+        const wishlistMap = new Map();
+        wishlistItems.forEach(item => {
+            wishlistMap.set(item.vehicleId.toString(), item.wishlist);
+        });
+
+
+        // Loop through vehicles and update wishlist status based on the map
+        allSearchResult = allSearchResult.map(vehicle => ({
+            ...vehicle.toObject(), // Convert Mongoose document to plain JavaScript object
+            wishlist: wishlistMap.has(vehicle._id.toString()) ? wishlistMap.get(vehicle._id.toString()) : false // Get wishlist status from the map
+        }));
+
+
 
 
         if (allSearchResult.length == 0) {
@@ -146,7 +164,7 @@ exports.filterByBrand = async (userId, type, brandId) => {
 }
 
 
-exports.filteringByPriceRange = async (minPrice, maxPrice, userId) => {
+exports.filteringByPriceRange = async (minPrice, maxPrice, userId, category) => {
 
     const session = await mongoose.startSession();
     session.startTransaction();
@@ -161,15 +179,24 @@ exports.filteringByPriceRange = async (minPrice, maxPrice, userId) => {
 
 
 
-        const query = { modelPrice: { $gte: minPrice, $lte: maxPrice } };
+        const query = { modelPrice: { $gte: minPrice, $lte: maxPrice }, category: category };
 
-        const allSearchResult = await Vehicle.find(query).populate('brandId').populate({
+        let allSearchResult = await Vehicle.find(query)
 
-            path: 'modelName',
+        const wishlistItems = await Wishlist.find({ userId: userId });
 
-            select: 'modelName _id',
+        // Create a map to store vehicleId-wishlistStatus pairs
+        const wishlistMap = new Map();
+        wishlistItems.forEach(item => {
+            wishlistMap.set(item.vehicleId.toString(), item.wishlist);
+        });
 
-        }).exec();
+
+        // Loop through vehicles and update wishlist status based on the map
+        allSearchResult = allSearchResult.map(vehicle => ({
+            ...vehicle.toObject(), // Convert Mongoose document to plain JavaScript object
+            wishlist: wishlistMap.has(vehicle._id.toString()) ? wishlistMap.get(vehicle._id.toString()) : false // Get wishlist status from the map
+        }));
 
 
         if (allSearchResult.length == 0) {

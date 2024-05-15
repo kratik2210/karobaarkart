@@ -30,9 +30,9 @@ exports.filterBrandService = function (userId, type, brandId) {
 }
 
 
-exports.filterByPriceRangeService = function (minPrice, maxPrice, userId) {
+exports.filterByPriceRangeService = function (minPrice, maxPrice, userId, category) {
     try {
-        return searchModel.filteringByPriceRange(minPrice, maxPrice, userId);
+        return searchModel.filteringByPriceRange(minPrice, maxPrice, userId, category);
     } catch (error) {
         Logger.error(` ${new Date()} Filtering Brands :filterBrandService${error}`);
         throw error;

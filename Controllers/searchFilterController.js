@@ -6,6 +6,7 @@ const { errorHandler } = require("../Utils/common/api-middleware");
 const { validateSearchWishlistInquiry, validateSearchVehicle } = require("../Utils/common/validator");
 const { default: mongoose } = require("mongoose");
 const Vehicle = require("../Schema/vehicleSchema");
+const Wishlist = require("../Schema/wishlistInquirySchema");
 
 exports.searchWishlistInquires = _g.asyncMiddlewareController(async (req, res) => {
     try {
@@ -119,7 +120,8 @@ exports.filterPriceRange = _g.asyncMiddlewareController(async (req, res) => {
         const userId = req.user._id;
         const minPrice = req.query.minPrice
         const maxPrice = req.query.maxPrice
-        const result = await SearchService.filterByPriceRangeService(minPrice, maxPrice, userId);
+        const category = req.query.category
+        const result = await SearchService.filterByPriceRangeService(minPrice, maxPrice, userId, category);
 
         let statusCode = errorCodes.SUCCESS.Value;
         let message = result.message;
@@ -143,28 +145,46 @@ exports.filterPriceRange = _g.asyncMiddlewareController(async (req, res) => {
 exports.filterVehicles = async (req, res) => {
     try {
         const { brandId, fuelType, seatingCapacity, loadingCapacity, minPrice, maxPrice } = req.query;
-        const { category } = req.query
+        const { category } = req.query;
 
         let returnResult = { status: false, message: '', data: null };
 
-        const isValidObjectId = mongoose.Types.ObjectId.isValid(brandId);
-        if (!isValidObjectId) {
-            return res.status(400).json({ status: false, message: 'Invalid brand ID format', data: null });
+        let query = { category: category };
+        if (brandId) {
+            const isValidObjectId = mongoose.Types.ObjectId.isValid(brandId);
+            if (!isValidObjectId) {
+                return res.status(400).json({ status: false, message: 'Invalid brand ID format', data: null });
+            }
+            query.brandId = brandId;
         }
 
-        const query = {
-            modelPrice: { $gte: minPrice, $lte: maxPrice },
-            brandId: brandId,
-            fuelType: fuelType,
-            seatingCapacity: seatingCapacity,
-            loadingCapacity: loadingCapacity,
-            category: category
-        };
+        if (fuelType) query.fuelType = fuelType;
+        if (seatingCapacity) query.seatingCapacity = seatingCapacity;
+        if (loadingCapacity) query.loadingCapacity = loadingCapacity;
+        if (minPrice && maxPrice) {
+            query.modelPrice = { $gte: minPrice, $lte: maxPrice };
+        }
 
         // Remove undefined or null fields from the query object
         Object.keys(query).forEach(key => query[key] == null && delete query[key]);
 
-        const filteredVehicles = await Vehicle.find(query).populate('brandId').exec();
+        let filteredVehicles = await Vehicle.find(query).populate('brandId').exec();
+
+        const wishlistItems = await Wishlist.find({ userId: req.user._id });
+
+        // Create a map to store vehicleId-wishlistStatus pairs
+        const wishlistMap = new Map();
+        wishlistItems.forEach(item => {
+            wishlistMap.set(item.vehicleId.toString(), item.wishlist);
+        });
+
+
+        filteredVehicles = filteredVehicles.map(vehicle => ({
+            ...vehicle.toObject(),
+            wishlist: wishlistMap.has(vehicle._id.toString()) ? wishlistMap.get(vehicle._id.toString()) : false
+        }));
+
+
 
         if (filteredVehicles.length === 0) {
             return res.status(404).json({ status: true, message: 'No vehicles found with the specified filters', data: null });
@@ -176,3 +196,4 @@ exports.filterVehicles = async (req, res) => {
         return res.status(500).json({ status: false, message: 'Internal server error', data: null });
     }
 };
+

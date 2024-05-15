@@ -215,16 +215,35 @@ exports.getVehicles = async (req, res) => {
 
         const totalPages = Math.ceil(totalCount / limit);
 
-        // Fetch wishlist items for the current user
-        const wishlistItems = await Wishlist.find({ createdBy: req.user._id });
+        // // Fetch wishlist items for the current user
+        // const wishlistItems = await Wishlist.find({ userId: req.user._id });
+        // console.log("🚀 ~ exports.getVehicles= ~ wishlistItems:", wishlistItems)
 
-        // Map vehicleIds from wishlistItems
-        const vehicleIdsInWishlist = wishlistItems.map(item => item.vehicleId.toString());
 
-        // Loop through vehicles and mark those in the user's wishlist
+        // // Map vehicleIds from wishlistItems
+        // const vehicleIdsInWishlist = wishlistItems.map(item => item.vehicleId.toString());
+
+
+        // // Loop through vehicles and mark those in the user's wishlist
+        // vehicles = vehicles.map(vehicle => ({
+        //     ...vehicle.toObject(), // Convert Mongoose document to plain JavaScript object
+        //     wishlist: vehicleIdsInWishlist.includes(vehicle._id.toString()) // Check if the vehicle is in the user's wishlist
+        // }));
+
+
+        const wishlistItems = await Wishlist.find({ userId: req.user._id });
+
+        // Create a map to store vehicleId-wishlistStatus pairs
+        const wishlistMap = new Map();
+        wishlistItems.forEach(item => {
+            wishlistMap.set(item.vehicleId.toString(), item.wishlist);
+        });
+
+
+        // Loop through vehicles and update wishlist status based on the map
         vehicles = vehicles.map(vehicle => ({
             ...vehicle.toObject(), // Convert Mongoose document to plain JavaScript object
-            wishlist: vehicleIdsInWishlist.includes(vehicle._id.toString()) // Check if the vehicle is in the user's wishlist
+            wishlist: wishlistMap.has(vehicle._id.toString()) ? wishlistMap.get(vehicle._id.toString()) : false // Get wishlist status from the map
         }));
 
         res.status(200).json({

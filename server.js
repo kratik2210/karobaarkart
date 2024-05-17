@@ -35,6 +35,7 @@ const adminRouter = require('./Routers/adminRouter');
 const vehicleRouter = require('./Routers/vehicleRouter');
 const wishlistRouter = require('./Routers/wishlistInquiryRouter');
 const searchRouter = require('./Routers/searchRouter');
+const auctionRouter = require('./Routers/auctionRouter');
 
 app.use('/api', accountRouter);
 app.use('/user', userRouter);
@@ -42,6 +43,7 @@ app.use('/admin', adminRouter);
 app.use('/vehicle', vehicleRouter);
 app.use('/vehicle', wishlistRouter);
 app.use('/search', searchRouter);
+app.use('/auction', auctionRouter);
 
 // Server listen port
 app.listen(process.env.PORT, (() => {

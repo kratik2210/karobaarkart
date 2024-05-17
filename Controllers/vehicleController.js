@@ -235,7 +235,7 @@ exports.getVehicles = async (req, res) => {
 
         // Create a map to store vehicleId-wishlistStatus pairs
         const wishlistMap = new Map();
-        wishlistItems.forEach(item => {
+        wish.forEach(item => {
             wishlistMap.set(item.vehicleId.toString(), item.wishlist);
         });
 
@@ -664,6 +664,51 @@ exports.getAllModelsRelatedToBrands = async (req, res) => {
     } catch (error) {
         console.log("Error in reading vehicle pricing data:", error.message || error);
         res.status(400).json({ success: false, error: error.message || error });
+    }
+};
+
+exports.sortVehicleByPrice = async (req, res) => {
+    try {
+        const { category } = req.query;
+
+        let sortDirection = 1;
+        if (req.query.sort === 'high') {
+            sortDirection = -1;
+        }
+        if (req.query.sort === 'low') {
+            sortDirection = 1;
+        }
+
+        const query = {
+            category: category
+        };
+
+        let vehicles = await Vehicle.find(query)
+            .sort({ modelPrice: sortDirection }).populate('brandId').populate({
+                path: 'modelName',
+                select: 'modelName _id',
+            }).exec();
+
+        if (!vehicles) {
+            return res.status(200).json({ message: 'No vehicles found' });
+        }
+
+        const wishlistItems = await Wishlist.find({ userId: req.user._id });
+
+        const wishlistMap = new Map();
+        wishlistItems.forEach(item => {
+            wishlistMap.set(item.vehicleId.toString(), item.wishlist);
+        });
+
+
+        vehicles = vehicles.map(vehicle => ({
+            ...vehicle.toObject(),
+            wishlist: wishlistMap.has(vehicle._id.toString()) ? wishlistMap.get(vehicle._id.toString()) : false
+        }));
+
+        res.status(200).json({ message: 'Vehicles retrieved successfully', data: vehicles });
+    } catch (error) {
+        res.status(500).json({ error: 'Internal server error', data: error });
     }
 };
 

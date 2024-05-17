@@ -1,5 +1,5 @@
 const express = require('express');
-const { createVehicle, getVehicles, vehiclesListing, singleVehicleBasedOnId, sellStatus, importVehiclePricing, postData, updateData, readMany, getAllModelsRelatedToBrands } = require('../Controllers/vehicleController');
+const { createVehicle, getVehicles, vehiclesListing, singleVehicleBasedOnId, sellStatus, importVehiclePricing, postData, updateData, readMany, getAllModelsRelatedToBrands, sortVehicleByPrice } = require('../Controllers/vehicleController');
 const router = express.Router();
 const upload = require('../Utils/common/upload')
 const localUpload = require('../Utils/common/localUpload')
@@ -29,5 +29,7 @@ router.post('/post-data', postData);
 router.put('/update-data', updateData);
 router.get('/read-many', readMany);
 router.get('/models-related-brands', getAllModelsRelatedToBrands);
+
+router.get('/sort-by-price', authMiddleware, sortVehicleByPrice);
 
 module.exports = router;

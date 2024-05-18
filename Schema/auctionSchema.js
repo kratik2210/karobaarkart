@@ -73,8 +73,20 @@ const Schema = mongoose.Schema;
 
 const auctionSchema = new Schema({
     vehicleId: { type: Schema.Types.ObjectId, ref: 'Vehicle', required: true },
-    startTime: { type: Date, required: true },
-    endTime: {
+    startTime: {
+        type: Date,
+        required: true,
+        validate: {
+            validator: function (value) {
+                const correctTime = new Date();
+                console.log("🚀 ~ correctTime:", correctTime)
+                const timezoneOffset = correctTime.getTimezoneOffset();
+                const timezoneAdjustedTime = new Date(correctTime.getTime() - (timezoneOffset * 60 * 1000));
+                return value > timezoneAdjustedTime;
+            },
+            message: 'Start time must be in the future',
+        },
+    }, endTime: {
         type: Date, required: true, validate: {
             validator: function (value) {
                 return value > this.startTime;
@@ -84,7 +96,7 @@ const auctionSchema = new Schema({
     },
     startingBid: { type: Number, required: true },
     currentBid: { type: Number },
-    highestBidder: { type: Schema.Types.ObjectId, ref: 'Dealer' },
+    highestBidder: { type: Schema.Types.ObjectId, ref: 'User' },
     auctionStatus: { type: String, enum: ['upcoming', 'ongoing', 'completed', 'cancelled'], default: 'upcoming' },
     createdBy: { type: Schema.Types.ObjectId, ref: 'User' },
     createdAt: { type: Date, default: Date.now },

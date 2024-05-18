@@ -231,11 +231,11 @@ exports.getVehicles = async (req, res) => {
         // }));
 
 
-        const wishlistItems = await Wishlist.find({ userId: req.user._id });
+        let wishlistItems = await Wishlist.find({ userId: req.user._id });
 
         // Create a map to store vehicleId-wishlistStatus pairs
         const wishlistMap = new Map();
-        wish.forEach(item => {
+        wishlistItems.forEach(item => {
             wishlistMap.set(item.vehicleId.toString(), item.wishlist);
         });
 
@@ -690,7 +690,7 @@ exports.sortVehicleByPrice = async (req, res) => {
             }).exec();
 
         if (!vehicles) {
-            return res.status(200).json({ message: 'No vehicles found' });
+            return res.status(200).json({ success: false, message: 'No vehicles found' });
         }
 
         const wishlistItems = await Wishlist.find({ userId: req.user._id });
@@ -706,9 +706,9 @@ exports.sortVehicleByPrice = async (req, res) => {
             wishlist: wishlistMap.has(vehicle._id.toString()) ? wishlistMap.get(vehicle._id.toString()) : false
         }));
 
-        res.status(200).json({ message: 'Vehicles retrieved successfully', data: vehicles });
+        res.status(200).json({ success: true, message: 'Vehicles retrieved successfully', data: vehicles });
     } catch (error) {
-        res.status(500).json({ error: 'Internal server error', data: error });
+        res.status(500).json({ success: false, message: 'Internal server error', data: error });
     }
 };
 

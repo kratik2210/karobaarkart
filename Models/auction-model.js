@@ -4,38 +4,51 @@ const Auction = require("../Schema/auctionSchema")
 const { API_RESP_CODES, ErrorMessages } = require('../Utils/common/error-codes')
 
 
-exports.oneLiveAuctionVehicle = async (userId, pagination) => {
+exports.oneLiveAuction = async (auctionId, userId) => {
 
     const session = await mongoose.startSession();
     session.startTransaction();
     try {
 
-        const {
-            page, limit, skip
-        } = pagination
-
         let returnResult = { status: false, message: '', data: null };
 
-        const isValidObjectId = mongoose.Types.ObjectId.isValid(userId);
+        const isValidObjectIdUser = mongoose.Types.ObjectId.isValid(userId);
+        const isValidObjectIdAuction = mongoose.Types.ObjectId.isValid(auctionId);
 
-        if (!isValidObjectId) {
+        if (!isValidObjectIdUser) {
             return { status: false, message: 'Invalid user ID format', data: null };
         }
 
-        const allVehicleListings = await Vehicle.find({ createdBy: userId }).populate('brandId').populate({
-            path: 'modelName',
-            select: 'modelName _id',
-        });
+        if (!isValidObjectIdAuction) {
+            return { status: false, message: 'Invalid vehicle ID format', data: null };
+        }
 
-        if (!allVehicleListings) {
-            return { status: false, message: API_RESP_CODES.VEHICLE_LISTING_EMPTY.message, data: null };
+        const oneAuction = await Auction.find({ _id: auctionId }).populate('vehicleId').populate({
+            path: 'vehicleId',
+            populate: {
+                path: 'brandId',
+                model: 'Brand',
+                select: 'brandName _id',
+            }
+        })
+            .populate({
+                path: 'vehicleId',
+                populate: {
+                    path: 'modelName',
+                    model: 'VehiclePricing',
+                    select: 'modelName _id',
+                }
+            });
+
+        if (!oneAuction) {
+            return { status: false, message: API_RESP_CODES.ONE_AUCTION_NOT_FOUND.message, data: null };
         }
 
         await session.commitTransaction();
 
         returnResult.status = true;
-        returnResult.message = API_RESP_CODES.VEHICLE_LISTING_SUCCESS.message
-        returnResult.data = allVehicleListings;
+        returnResult.message = API_RESP_CODES.ONE_AUCTION_FOUND.message
+        returnResult.data = oneAuction;
 
 
         return returnResult;

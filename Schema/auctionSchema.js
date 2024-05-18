@@ -76,16 +76,7 @@ const auctionSchema = new Schema({
     startTime: {
         type: Date,
         required: true,
-        validate: {
-            validator: function (value) {
-                const correctTime = new Date();
-                console.log("🚀 ~ correctTime:", correctTime)
-                const timezoneOffset = correctTime.getTimezoneOffset();
-                const timezoneAdjustedTime = new Date(correctTime.getTime() - (timezoneOffset * 60 * 1000));
-                return value > timezoneAdjustedTime;
-            },
-            message: 'Start time must be in the future',
-        },
+
     }, endTime: {
         type: Date, required: true, validate: {
             validator: function (value) {

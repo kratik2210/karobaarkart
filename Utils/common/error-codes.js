@@ -138,9 +138,17 @@ const API_RESP_CODES = {
         status: 404,
         message: 'No listings found',
     },
+    ONE_AUCTION_NOT_FOUND: {
+        status: 404,
+        message: 'No auction found',
+    },
     VEHICLE_LISTING_SUCCESS: {
         status: 200,
         message: 'All listings fetched',
+    },
+    ONE_AUCTION_FOUND: {
+        status: 200,
+        message: 'Auction fetched successfully',
     },
     VEHICLE_CANT_B_F: {
         status: 404,

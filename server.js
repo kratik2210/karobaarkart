@@ -8,7 +8,10 @@ const mongoose = require('mongoose');
 const logger = require('./Utils/logger/log.config');
 const Redis = require('redis')
 const helmet = require('helmet')
+const http = require('http');
 const redisClient = Redis.createClient()
+const { initializeSocket } = require('./Socket/socket');
+
 // Configs
 env.config();
 
@@ -45,7 +48,13 @@ app.use('/vehicle', wishlistRouter);
 app.use('/search', searchRouter);
 app.use('/auction', auctionRouter);
 
+const server = http.createServer(app);
+
+// Initialize Socket.IO
+initializeSocket(server);
+
+
 // Server listen port
-app.listen(process.env.PORT, (() => {
+server.listen(process.env.PORT, (() => {
   logger.info(`Server connected with port : ${process.env.PORT}`);
 }));

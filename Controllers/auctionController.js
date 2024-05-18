@@ -1,7 +1,11 @@
-const { CronJob } = require('cron'); const _g = require('../Utils/GlobalFunctions');
+const { CronJob } = require('cron');
+const _g = require('../Utils/GlobalFunctions');
 const Vehicle = require('../Schema/vehicleSchema');
 const Auction = require('../Schema/auctionSchema');
 const moment = require('moment-timezone');
+const AuctionService = require('../Services/auction-service');
+const { errorCodes, API_RESP_CODES } = require('../Utils/common/error-codes');
+const { errorHandler } = require('../Utils/common/api-middleware');
 
 exports.createAuction = async (req, res) => {
     try {
@@ -28,23 +32,17 @@ exports.createAuction = async (req, res) => {
         const correctTime = moment().tz(timezone);
         const timezoneOffset = correctTime.utcOffset();
         const correctedStartTime = moment(savedAuction.startTime).tz(timezone).add(timezoneOffset, 'minutes').toDate();
-        console.log("🚀 ~ exports.createAuction= ~ correctedStartTime:", correctedStartTime == savedAuction.startTime)
+        const adjustedTime = new Date(new Date(savedAuction.startTime).getTime() - (5 * 60 + 30) * 60000);
 
+        const job = new CronJob(adjustedTime, async () => {
+            const auction = await Auction.findById(savedAuction._id);
+            if (auction) {
+                auction.auctionStatus = 'ongoing';
+                await auction.save();
+            }
+        });
 
-        if (correctedStartTime == savedAuction.startTime) {
-            const job = new CronJob(correctedStartTime, async () => {
-                const auction = await Auction.findById(savedAuction._id);
-                console.log("🚀 ~ job ~ auction:", auction)
-                if (auction) {
-                    auction.auctionStatus = 'ongoing';
-                    await auction.save();
-                }
-            });
-
-            job.start();
-        }
-
-
+        job.start();
 
         res.status(201).json({ message: 'Auction created successfully', data: savedAuction });
     } catch (error) {
@@ -92,21 +90,21 @@ exports.getAuctions = async (req, res) => {
 
 
 
-exports.singleLiveAuctionVehicle = _g.asyncMiddlewareController(async (req, res) => {
+exports.singleLiveAuction = _g.asyncMiddlewareController(async (req, res) => {
     try {
         const userId = req.user._id;
-        const vehicleId = req.query.vehicleId
+        const auctionId = req.query.auctionId
 
-        const result = await auctionService.singleLiveAuctionService(vehicleId, userId);
+        const result = await AuctionService.singleLiveAuctionService(auctionId, userId);
 
         let statusCode = errorCodes.SUCCESS.Value;
         let message = result.message;
         let data = result.data;
 
 
-        if (result.message === API_RESP_CODES.VEHICLE_LISTING_EMPTY.message) {
-            message = API_RESP_CODES.VEHICLE_LISTING_EMPTY.message;
-            statusCode = API_RESP_CODES.VEHICLE_LISTING_EMPTY.status;
+        if (result.message === API_RESP_CODES.ONE_AUCTION_NOT_FOUND.message) {
+            message = API_RESP_CODES.ONE_AUCTION_NOT_FOUND.message;
+            statusCode = API_RESP_CODES.ONE_AUCTION_NOT_FOUND.status;
         }
 
         res.status(statusCode)
@@ -116,3 +114,5 @@ exports.singleLiveAuctionVehicle = _g.asyncMiddlewareController(async (req, res)
         errorHandler(res, error);
     }
 })
+
+

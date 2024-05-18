@@ -7,7 +7,7 @@ let io;
 function initializeSocket(server) {
     io = socketIO(server, {
         cors: {
-            origin: 'https://api.karobaarkart.com', // Replace with the URL of your client-side application
+            origin: 'https://karobaarkart.com', // Replace with the URL of your client-side application
             methods: ['GET', 'POST'],
             allowedHeaders: ['Content-Type'],
             credentials: true,

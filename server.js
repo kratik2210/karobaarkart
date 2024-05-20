@@ -10,7 +10,10 @@ const Redis = require('redis')
 const helmet = require('helmet')
 const http = require('http');
 const redisClient = Redis.createClient()
-const { initializeSocket } = require('./Socket/socket');
+const { initializeSocket } = require('./Sockets/socket');
+
+const server = http.createServer(app);
+
 
 // Configs
 env.config();
@@ -26,10 +29,15 @@ mongoose.connect(process.env.MONGOURL, {
   useNewUrlParser: true,
   useUnifiedTopology: true
 }).then(() => {
+  initializeSocket(server);
+
   logger.info('DB connected successfully...');
 }).catch((err) => {
   logger.error('DB connected with some issues..');
 })
+
+
+
 
 // Api
 const accountRouter = require('./Routers/accountRouter');
@@ -48,13 +56,10 @@ app.use('/vehicle', wishlistRouter);
 app.use('/search', searchRouter);
 app.use('/auction', auctionRouter);
 
-const server = http.createServer(app);
-
-// Initialize Socket.IO
-initializeSocket(server);
 
 
 // Server listen port
 server.listen(process.env.PORT, (() => {
   logger.info(`Server connected with port : ${process.env.PORT}`);
 }));
+

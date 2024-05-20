@@ -10,3 +10,13 @@ exports.singleLiveAuctionService = function (auctionId, userId) {
     }
 }
 
+
+exports.placeBidService = function (auctionId, userId, currentBid) {
+    try {
+        return AuctionModel.placeBidModel(auctionId, userId, currentBid);
+    } catch (error) {
+        Logger.error(` ${new Date()} Authentication::placeBidService:${error}`);
+        throw error;
+    }
+}
+

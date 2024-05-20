@@ -135,12 +135,16 @@ const API_RESP_CODES = {
         message: 'No data to be found',
     },
     VEHICLE_LISTING_EMPTY: {
-        status: 404,
+        status: 200,
         message: 'No listings found',
     },
     ONE_AUCTION_NOT_FOUND: {
-        status: 404,
+        status: 200,
         message: 'No auction found',
+    },
+    BID_FOUND: {
+        status: 200,
+        message: 'No bid found',
     },
     VEHICLE_LISTING_SUCCESS: {
         status: 200,
@@ -149,6 +153,10 @@ const API_RESP_CODES = {
     ONE_AUCTION_FOUND: {
         status: 200,
         message: 'Auction fetched successfully',
+    },
+    BID_PLACED: {
+        status: 200,
+        message: 'Bid placed successfully',
     },
     VEHICLE_CANT_B_F: {
         status: 404,

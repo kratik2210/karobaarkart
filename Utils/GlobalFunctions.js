@@ -74,3 +74,19 @@ exports.asyncMiddlewareController = function (handler) {
       }
    };
 }
+
+exports.authenticateUser = (token) => {
+   try {
+      if (!token) {
+         return { status: false, message: 'Token not found' };
+      }
+
+      const decodedToken = JWT.verify(token, process.env.JWT_SECRETKEY);
+      return { status: true, userData: decodedToken };
+   } catch (error) {
+      if (error.name === 'TokenExpiredError') {
+         return { status: false, message: 'Token Expired' };
+      }
+      return { status: false, message: API_RESP_CODES.TOKEN_INVALID.message };
+   }
+};

@@ -6,11 +6,18 @@ const moment = require('moment-timezone');
 const AuctionService = require('../Services/auction-service');
 const { errorCodes, API_RESP_CODES } = require('../Utils/common/error-codes');
 const { errorHandler } = require('../Utils/common/api-middleware');
+const { validateAuctionData } = require('../Utils/common/validator');
 
 exports.createAuction = async (req, res) => {
     try {
         const vehicleId = req.query.vehicleId
-        const { startTime, endTime, startingBid } = req.body;
+        const { startTime, endTime, startingBid, rating } = req.body;
+
+        const { error } = validateAuctionData({ startTime, endTime, startingBid, rating });
+        if (error) {
+            return res.status(400).json({ error: error.details[0].message });
+        }
+
 
         const vehicle = await Vehicle.findById(vehicleId);
 
@@ -27,6 +34,11 @@ exports.createAuction = async (req, res) => {
         });
 
         const savedAuction = await newAuction.save();
+
+        vehicle.rating = rating;
+        await vehicle.save();
+
+
 
         const timezone = 'Asia/Kolkata';
         const correctTime = moment().tz(timezone);

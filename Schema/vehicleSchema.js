@@ -105,6 +105,15 @@ const vehicleSchema = new Schema({
     contactNumber: {
         type: Number
     },
+    sellingPrice: {
+        type: Number,
+        default: null
+    },
+    rating: {
+        type: Number,
+        default: null
+
+    },
     // calculatedPrice: {
     //     type: Number
     // }

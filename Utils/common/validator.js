@@ -374,6 +374,35 @@ function validateVehicle(vehicle) {
 }
 
 
+function validateAuctionData(data) {
+    const schema = Joi.object({
+        startTime: Joi.date().required().min(Date.now()).messages({
+            'date.base': 'Start time must be a valid date',
+            'date.min': 'Start time cannot be in the past',
+            'any.required': 'Start time is required'
+        }),
+        endTime: Joi.date().required().min(Joi.ref('startTime')).messages({
+            'date.base': 'End time must be a valid date',
+            'date.min': 'End time must be after the start time',
+            'any.required': 'End time is required'
+        }),
+        startingBid: Joi.number().required().positive().messages({
+            'number.base': 'Starting bid must be a number',
+            'number.positive': 'Starting bid must be a positive number',
+            'any.required': 'Starting bid is required'
+        }),
+        rating: Joi.number().required().min(1).max(10).messages({
+            'number.base': 'Rating must be a number',
+            'number.min': 'Rating must be between 1 and 5',
+            'number.max': 'Rating must be between 1 and 5',
+            'any.required': 'Rating is required'
+        })
+    });
+
+    return schema.validate(data);
+}
+
+
 module.exports = {
     userSignUp,
     userLogin,
@@ -383,5 +412,6 @@ module.exports = {
     validateSearchWishlistInquiry,
     validateAdminLogin,
     validateEditBrand,
-    validateVehicle
+    validateVehicle,
+    validateAuctionData
 };

@@ -22,6 +22,7 @@ exports.updateUser = _g.asyncMiddlewareController(async (req, res) => {
             bankAccNo,
             bankAccName,
             ifscCode,
+            isApproved
         } = req.body;
 
 

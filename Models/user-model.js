@@ -27,7 +27,8 @@ exports.profileUpdate = async (formData, userId) => {
             bankAccName,
             ifscCode,
             businessProofPath,
-            docImagePath
+            docImagePath,
+            isApproved
         } = formData;
         let returnResult = { status: false, message: '', data: null };
         const user = await Users.findOne({ _id: userId })
@@ -50,6 +51,8 @@ exports.profileUpdate = async (formData, userId) => {
         if (ifscCode) needToUpdateData.ifscCode = ifscCode;
         if (businessProofPath) needToUpdateData.businessProof = businessProofPath;
         if (docImagePath) needToUpdateData.docImage = docImagePath;
+        if (isApproved) needToUpdateData.isApproved = isApproved;
+
         needToUpdateData.updatedBy = userId
         needToUpdateData.updatedAt = Date.now()
         Object.assign(user, needToUpdateData);

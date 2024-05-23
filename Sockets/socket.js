@@ -162,10 +162,8 @@ function initializeSocket(server) {
         // Join the room associated with the auction
 
         socket.on('joinRoom', (auctionId) => {
-            console.log("🚀 ~ socket.on ~ auctionId:", auctionId)
             socket.join(auctionId)
             console.log(`Client joined room: ${auctionId}`);
-
             socket.emit('message', `Welcome to ${auctionId}`);
         });
         ;

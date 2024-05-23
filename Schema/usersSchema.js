@@ -66,7 +66,9 @@ const userSchema = new Schema({
     // ...(this.userType === 'dealer' ? { isApproved: { type: Boolean, default: false } } : {}),
     isApproved: {
         type: Boolean,
-        default: false
+        default: function () {
+            return this.userType === 'user' ? true : false;
+        }
     },
     createdBy: {
         type: mongoose.Schema.Types.ObjectId,

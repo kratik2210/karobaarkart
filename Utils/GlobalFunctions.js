@@ -44,6 +44,12 @@ exports.authMiddleware = function (req, res, next) {
                data: null,
             });
          } else {
+            if (!decoded.isApproved) {
+               return res.status(403).json({
+                  success: false,
+                  message: 'Account disabled by admin',
+               });
+            }
             req.user = decoded;
             next();
          }

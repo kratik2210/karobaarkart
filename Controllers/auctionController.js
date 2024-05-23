@@ -134,10 +134,11 @@ exports.singleLiveAuction = _g.asyncMiddlewareController(async (req, res) => {
 exports.placeBid = _g.asyncMiddlewareController(async (req, res) => {
     try {
         const userId = req.user._id;
+        const isPaid = req.user.isPaid;
         const auctionId = req.query.auctionId
         const currentBid = req.body.currentBid
 
-        const result = await AuctionService.placeBidService(auctionId, userId, currentBid);
+        const result = isPaid && await AuctionService.placeBidService(auctionId, userId, currentBid);
 
         let statusCode = errorCodes.SUCCESS.Value;
         let message = result.message;

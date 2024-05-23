@@ -104,7 +104,11 @@ exports.oneLiveAuction = async (auctionId, userId) => {
 }
 
 
-exports.placeBidModel = async (auctionId, userId, currentBid) => {
+exports.placeBidModel = async (auctionId, userId, currentBid, isPaid) => {
+
+    // if (!isPaid) {
+    //     return { status: false, message: 'Bid cannot be placed because payment is not completed', data: null };
+    // }
     const session = await mongoose.startSession();
     session.startTransaction();
     try {
@@ -139,7 +143,7 @@ exports.placeBidModel = async (auctionId, userId, currentBid) => {
         if (oneAuction.currentBid && currentBid <= oneAuction.currentBid) {
             io.to(auctionId).emit('bidError', { message: 'New bid must be higher than the current highest bid' });
 
-            return { status: false, message: 'New bid must be higher than the current highest bid', data: null };
+            return { status: false, message: 'bid must be higher than the current highest bid', data: null };
         }
 
         // Create a new bid

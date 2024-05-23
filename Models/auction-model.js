@@ -55,7 +55,7 @@ exports.oneLiveAuction = async (auctionId, userId) => {
                 select: 'userName address',
             })
             .sort({ createdAt: -1 })
-            .limit(2)
+            .limit(8)
 
 
         const sortedBids = allLatestBids
@@ -130,14 +130,14 @@ exports.placeBidModel = async (auctionId, userId, currentBid) => {
 
         // Check if the initial bid is greater than the starting bid
         if (!oneAuction.currentBid && currentBid <= oneAuction.startingBid) {
-            io.emit('bidError', { message: 'Initial bid must be higher than the starting bid' });
+            io.to(auctionId).emit('bidError', { message: 'Initial bid must be higher than the starting bid' });
 
             return { status: false, message: 'Initial bid must be higher than the starting bid', data: null };
         }
 
         // Check if the new bid is higher than the current highest bid
         if (oneAuction.currentBid && currentBid <= oneAuction.currentBid) {
-            io.emit('bidError', { message: 'New bid must be higher than the current highest bid' });
+            io.to(auctionId).emit('bidError', { message: 'New bid must be higher than the current highest bid' });
 
             return { status: false, message: 'New bid must be higher than the current highest bid', data: null };
         }
@@ -149,7 +149,7 @@ exports.placeBidModel = async (auctionId, userId, currentBid) => {
         const populatedBid = await bid.populate({
             path: 'bidderId',
             model: 'User',
-            select: 'userName address',
+            select: 'userName address ',
         })
 
         const totalBids = await Bid.countDocuments({ auctionId }) + 1;
@@ -159,10 +159,10 @@ exports.placeBidModel = async (auctionId, userId, currentBid) => {
                 model: 'User',
             })
             .sort({ createdAt: -1 })
-            .limit(2)
+            .limit(8)
 
 
-        const sortedBids = allLatestBids
+        const sortedBids = [bid, ...allLatestBids]
 
         const highestBidder = {
             _id: populatedBid.bidderId._id,
@@ -175,14 +175,15 @@ exports.placeBidModel = async (auctionId, userId, currentBid) => {
         oneAuction.highestBidder = userId;
         await oneAuction.save({ session });
 
-        await session.commitTransaction();
         returnResult.status = true;
         returnResult.message = API_RESP_CODES.ONE_AUCTION_FOUND.message;
         returnResult.data = oneAuction;
 
 
-        io.emit('newHighestBid', { auctionId, currentBid, highestBidder, totalBids, sortedBids });
+        // io.emit('joinRoom', { auctionId });
+        io.to(auctionId).emit('newHighestBid', { auctionId, currentBid, highestBidder, totalBids, sortedBids });
 
+        await session.commitTransaction();
 
         return returnResult;
     } catch (error) {
@@ -192,3 +193,5 @@ exports.placeBidModel = async (auctionId, userId, currentBid) => {
         session.endSession();
     }
 };
+
+

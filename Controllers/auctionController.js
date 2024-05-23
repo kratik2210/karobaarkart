@@ -7,6 +7,8 @@ const AuctionService = require('../Services/auction-service');
 const { errorCodes, API_RESP_CODES } = require('../Utils/common/error-codes');
 const { errorHandler } = require('../Utils/common/api-middleware');
 const { validateAuctionData } = require('../Utils/common/validator');
+const { default: mongoose } = require('mongoose');
+const Bid = require('../Schema/bidSchema');
 
 exports.createAuction = async (req, res) => {
     try {
@@ -156,3 +158,46 @@ exports.placeBid = _g.asyncMiddlewareController(async (req, res) => {
 })
 
 
+
+exports.getBidsOnProfile = _g.asyncMiddlewareController(async (req, res) => {
+    const userId = req.user._id;
+
+    try {
+        let returnResult = { status: false, message: '', data: null };
+
+        const isValidObjectIdUser = mongoose.Types.ObjectId.isValid(userId);
+
+        if (!isValidObjectIdUser) {
+            return res.status(400).json({ status: false, message: 'Invalid user ID format', data: null });
+        }
+
+        const allUserBids = await Bid.find({ bidderId: userId })
+            .populate({
+                path: 'auctionId',
+                model: 'Auction',
+                populate: {
+                    path: 'vehicleId',
+                    populate: {
+                        path: 'brandId',
+                        model: 'Brand',
+                        select: 'brandName _id',
+                    },
+                },
+            })
+            .sort({ updatedAt: -1 });
+
+        if (!allUserBids || allUserBids.length === 0) {
+            return res.status(200).json({ status: false, message: 'No bids found for this user', data: null });
+        }
+
+        returnResult.status = true;
+        returnResult.message = 'User bids found';
+        returnResult.data = allUserBids;
+
+        res.status(200).json(returnResult);
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ status: false, message: 'Internal server error', data: null });
+    }
+});

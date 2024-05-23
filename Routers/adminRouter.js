@@ -1,5 +1,5 @@
 const express = require('express');
-const { createBrand, getAllBrands, editBrand } = require('../Controllers/brandController');
+const { createBrand, getAllBrands, editBrand, updateSellingPriceForUsedVehicle } = require('../Controllers/brandController');
 const router = express.Router();
 const upload = require('../Utils/common/upload')
 const { authMiddleware } = require('../Utils/GlobalFunctions');
@@ -20,6 +20,8 @@ router.put('/admin/update-profile', authMiddleware, upload.fields([
     { name: 'docImage', maxCount: 1 },
     { name: 'businessProof', maxCount: 1 }
 ]), updateUser)
+
+router.put('/selling-price-updation', authMiddleware, updateSellingPriceForUsedVehicle)
 
 
 

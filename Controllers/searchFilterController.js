@@ -187,7 +187,7 @@ exports.filterVehicles = async (req, res) => {
 
 
         if (filteredVehicles.length === 0) {
-            return res.status(404).json({ status: true, message: 'No vehicles found with the specified filters', data: null });
+            return res.status(200).json({ status: true, message: 'No vehicles found with the specified filters', data: null });
         }
 
         return res.status(200).json({ status: true, message: 'Filtered successfully', data: filteredVehicles });

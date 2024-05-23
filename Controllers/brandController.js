@@ -4,6 +4,8 @@ const { errorCodes, API_RESP_CODES } = require("../Utils/common/error-codes");
 const BrandService = require("../Services/brand-service");
 const { errorHandler, apiValidResponse, internalErrResp } = require("../Utils/common/api-middleware");
 const { validateWishlist, validateEditBrand } = require("../Utils/common/validator");
+const Joi = require('joi/lib');
+const Vehicle = require('../Schema/vehicleSchema');
 
 exports.createBrand = async (req, res) => {
     try {
@@ -87,4 +89,51 @@ exports.editBrand = _g.asyncMiddlewareController(async (req, res) => {
         });
 
 
+})
+
+
+exports.updateSellingPriceForUsedVehicle = _g.asyncMiddlewareController(async (req, res) => {
+    try {
+        const vehicleId = req.query.vehicleId;
+        const { rating, sellingPrice } = req.body;
+
+        // Validate input fields using Joi
+        const schema = Joi.object({
+            rating: Joi.number().min(0).max(10), // Example validation for rating
+            sellingPrice: Joi.number().positive() // Example validation for sellingPrice
+        });
+
+        const { error } = schema.validate({ rating, sellingPrice });
+
+        if (error) {
+            return res.status(400).json({ error: error.details[0].message });
+        }
+
+        // Find the vehicle by id and validate sellStatus
+        const vehicle = await Vehicle.findById(vehicleId);
+
+        if (!vehicle) {
+            return res.status(404).json({ error: 'Vehicle not found' });
+        }
+
+        if (vehicle.sellStatus !== 'used') {
+            return res.status(400).json({ error: 'Not the correct category vehicle' });
+        }
+
+        // Update the vehicle fields
+        if (rating !== undefined) {
+            vehicle.rating = rating;
+        }
+        if (sellingPrice !== undefined) {
+            vehicle.sellingPrice = sellingPrice;
+        }
+
+        // Save the updated vehicle
+        const updatedVehicle = await vehicle.save();
+
+        res.status(200).json({ message: 'Vehicle updated successfully', data: updatedVehicle });
+    } catch (error) {
+        console.log("🚀 ~ exports.updateVehicle ~ error:", error);
+        res.status(500).json({ error: 'Internal server error', data: error });
+    }
 })

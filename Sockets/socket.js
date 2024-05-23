@@ -155,34 +155,20 @@ function initializeSocket(server) {
     io.on('connect', (socket) => {
         console.log('A user connected');
 
-        // socket.on('placeBid', async (bidData, callback) => {
-        //     console.log("🚀 ~ socket.on ~ bidData:", bidData)
-        //     try {
-        //         const { auctionId, currentBid, userId } = bidData;
 
-        //         if (!auctionId || !currentBid) {
-        //             socket.emit('bidError', { message: 'Invalid bid data' });
-        //             if (callback) callback({ status: 'error', message: 'Invalid bid data' });
-        //             return;
-        //         }
 
-        //         const result = await placeBidModel(auctionId, userId, currentBid);
-        //         console.log("🚀 ~ socket.on ~ result:", result)
+        const auctionId = socket.handshake.query.auctionId;
 
-        //         if (result.status) {
-        //             const { currentBid, highestBidder } = result.data;
-        //             io.emit('newHighestBid', { auctionId, currentBid, highestBidder });
-        //             if (callback) callback({ status: 'success', data: result.data });
-        //         } else {
-        //             socket.emit('bidError', { message: result.message });
-        //             if (callback) callback({ status: 'error', message: result.message });
-        //         }
-        //     } catch (error) {
-        //         console.error('Error placing bid:', error);
-        //         socket.emit('bidError', { message: 'An error occurred while placing the bid' });
-        //         if (callback) callback({ status: 'error', message: 'An error occurred while placing the bid' });
-        //     }
-        // });
+        // Join the room associated with the auction
+
+        socket.on('joinRoom', (auctionId) => {
+            console.log("🚀 ~ socket.on ~ auctionId:", auctionId)
+            socket.join(auctionId)
+            console.log(`Client joined room: ${auctionId}`);
+
+            socket.emit('message', `Welcome to ${auctionId}`);
+        });
+        ;
 
         socket.on('disconnect', () => {
             console.log('A user disconnected');
@@ -201,3 +187,35 @@ module.exports = {
     initializeSocket,
     getIO,
 };
+
+
+
+// socket.on('placeBid', async (bidData, callback) => {
+//     console.log("🚀 ~ socket.on ~ bidData:", bidData)
+//     try {
+//         const { auctionId, currentBid, userId } = bidData;
+
+//         if (!auctionId || !currentBid) {
+//             socket.emit('bidError', { message: 'Invalid bid data' });
+//             if (callback) callback({ status: 'error', message: 'Invalid bid data' });
+//             return;
+//         }
+
+//         const result = await placeBidModel(auctionId, userId, currentBid);
+//         console.log("🚀 ~ socket.on ~ result:", result)
+
+//         if (result.status) {
+//             const { currentBid, highestBidder } = result.data;
+//             io.emit('newHighestBid', { auctionId, currentBid, highestBidder });
+//             if (callback) callback({ status: 'success', data: result.data });
+//         } else {
+//             socket.emit('bidError', { message: result.message });
+//             if (callback) callback({ status: 'error', message: result.message });
+//         }
+//     } catch (error) {
+//         console.error('Error placing bid:', error);
+//         socket.emit('bidError', { message: 'An error occurred while placing the bid' });
+//         if (callback) callback({ status: 'error', message: 'An error occurred while placing the bid' });
+//     }
+// });
+

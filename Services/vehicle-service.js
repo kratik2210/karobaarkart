@@ -27,4 +27,13 @@ exports.singleVehicleService = function (vehicleId) {
     }
 }
 
+exports.vehicleEditService = function (vehicleId, formData) {
+    try {
+        return vehicleModel.editVehicleModel(vehicleId, formData);
+    } catch (error) {
+        Logger.error(` ${new Date()} Authentication::vehicleCreation:${error}`);
+        throw error;
+    }
+}
+
 

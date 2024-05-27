@@ -1,5 +1,5 @@
 const express = require('express');
-const { createVehicle, getVehicles, vehiclesListing, singleVehicleBasedOnId, sellStatus, importVehiclePricing, postData, updateData, readMany, getAllModelsRelatedToBrands, sortVehicleByPrice } = require('../Controllers/vehicleController');
+const { createVehicle, getVehicles, vehiclesListing, singleVehicleBasedOnId, sellStatus, importVehiclePricing, postData, updateData, readMany, getAllModelsRelatedToBrands, sortVehicleByPrice, editVehicle } = require('../Controllers/vehicleController');
 const router = express.Router();
 const upload = require('../Utils/common/upload')
 const localUpload = require('../Utils/common/localUpload')
@@ -10,6 +10,8 @@ router.post('/add-vehicle', authMiddleware, upload.fields([
     { name: 'modelCoverImage', maxCount: 1 },
     { name: 'modelMultiImages', maxCount: 5 }
 ]), authMiddleware, createVehicle)
+
+
 
 router.get('/retrive-vehicles', authMiddleware, getVehicles);
 
@@ -31,5 +33,10 @@ router.get('/read-many', readMany);
 router.get('/models-related-brands', getAllModelsRelatedToBrands);
 
 router.get('/sort-by-price', authMiddleware, sortVehicleByPrice);
+
+router.put('/edit-vehicle', authMiddleware, upload.fields([
+    { name: 'modelCoverImage', maxCount: 1 },
+    { name: 'modelMultiImages', maxCount: 5 }
+]), authMiddleware, editVehicle)
 
 module.exports = router;

@@ -178,6 +178,10 @@ const API_RESP_CODES = {
         status: 201,
         message: 'Vehicle added successfully',
     },
+    VEHICLE_EDIT: {
+        status: 201,
+        message: 'Vehicle edited successfully',
+    },
 };
 
 const ErrorMessages = {

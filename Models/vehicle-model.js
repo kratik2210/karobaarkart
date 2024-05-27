@@ -187,3 +187,81 @@ exports.getSingleVehicle = async (vehicleId) => {
         session.endSession();
     }
 }
+
+
+exports.editVehicleModel = async (vehicleId, formData) => {
+    const session = await mongoose.startSession();
+    session.startTransaction();
+    try {
+        let returnResult = { status: false, message: '', data: null };
+
+        // Find existing vehicle
+        const existingVehicle = await Vehicle.findById(vehicleId).session(session);
+        if (!existingVehicle) {
+            returnResult.message = ErrorMessages.VEHICLE_NOT_FOUND;
+            return returnResult;
+        }
+
+        // Check if brand exists if brandId is provided
+        if (formData.brandId) {
+            const brand = await Brands.findOne({ _id: formData.brandId }).session(session);
+            if (!brand) {
+                returnResult.message = ErrorMessages.BRAND_NOT_FOUND;
+                return returnResult;
+            }
+        }
+
+        // Update fields only if they are provided in formData
+        Object.keys(formData).forEach(field => {
+            if (formData[field] !== undefined) {
+                existingVehicle[field] = formData[field];
+            }
+        });
+
+        // Convert string to boolean for fitness and insurance if provided
+        if (formData.fitness) {
+            existingVehicle.fitness = formData.fitness === 'valid';
+        }
+        if (formData.insurance) {
+            existingVehicle.insurance = formData.insurance === 'valid';
+        }
+
+        const updatedVehicle = await existingVehicle.save();
+
+        // Update vehicle pricing if modelName or other related fields are provided
+        if (formData.modelName || formData.modelYear || formData.insurance || formData.fitness || formData.bodyType || formData.tyreCondition) {
+            const vehiclePricing = await VehiclePricing.findOne({ _id: updatedVehicle.modelName }).session(session);
+            if (!vehiclePricing) {
+                returnResult.message = ErrorMessages.VEHICLE_PRICING_NOT_FOUND;
+                return returnResult;
+            }
+
+            let adjustedPrice = vehiclePricing[updatedVehicle.modelYear];
+            adjustedPrice -= vehiclePricing[updatedVehicle.insurance ? `insuranceValid` : `insuranceInValid`];
+            adjustedPrice -= vehiclePricing[updatedVehicle.fitness ? `fitnessValid` : `fitnessInValid`];
+
+            if (updatedVehicle.bodyType) {
+                adjustedPrice -= vehiclePricing[updatedVehicle.bodyType];
+            }
+
+            if (updatedVehicle.tyreCondition) {
+                adjustedPrice -= vehiclePricing[`tyre-${updatedVehicle.tyreCondition}`];
+            }
+
+            updatedVehicle.modelPrice = Number(adjustedPrice);
+            await updatedVehicle.save();
+        }
+
+        returnResult.status = true;
+        returnResult.message = API_RESP_CODES.VEHICLE_EDIT.message;
+        returnResult.data = updatedVehicle;
+        await session.commitTransaction();
+        return returnResult;
+    } catch (error) {
+        await session.abortTransaction();
+        throw error;
+    } finally {
+        session.endSession();
+    }
+}
+

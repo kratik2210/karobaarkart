@@ -403,6 +403,39 @@ function validateAuctionData(data) {
 }
 
 
+function validateEditVehicle(vehicle) {
+    try {
+        const schema = Joi.object({
+            brandId: Joi.string(),
+            modelName: Joi.string().trim().min(3).max(50),
+            modelYear: Joi.number().integer().min(1900).max(new Date().getFullYear()),
+            // modelNumber: Joi.number(),
+            seatingCapacity: Joi.number(),
+            modelCoverImage: Joi.string().allow(null),
+            modelMultiImages: Joi.array().items(Joi.string().allow(null)),
+            // modelPrice: Joi.number().allow(null),
+            modelLocation: Joi.string().allow(null),
+            modelRating: Joi.number().allow(null),
+            description: Joi.string().allow(null),
+            mileage: Joi.number().allow(null),
+            fuelType: Joi.string().valid('petrol', 'diesel').allow(null),
+            loadingCapacity: Joi.string().allow(null),
+            insurance: Joi.string().valid('valid', 'notvalid').allow(null),
+            kmsDriven: Joi.number().allow(null),
+            category: Joi.string().valid('used', 'new'),
+            tyreCondition: Joi.string().valid('25%', '50%', '75%', '100%').allow(null),
+            fitness: Joi.string().valid('valid', 'notvalid').allow(null),
+            bodyType: Joi.string().valid('chassis', 'halfbody', 'fullbody', 'highbuild', 'container').allow(null),
+            updatedBy: Joi.string(),
+            contactNumber: Joi.string(),
+        });
+
+        return schema.validate(vehicle, { allowUnknown: true });
+    } catch (error) {
+        return { error };
+    }
+}
+
 module.exports = {
     userSignUp,
     userLogin,
@@ -413,5 +446,6 @@ module.exports = {
     validateAdminLogin,
     validateEditBrand,
     validateVehicle,
-    validateAuctionData
+    validateAuctionData,
+    validateEditVehicle
 };

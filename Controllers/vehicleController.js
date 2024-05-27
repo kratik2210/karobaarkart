@@ -5,7 +5,7 @@ const vehicleService = require('../Services/vehicle-service')
 const _g = require('../Utils/GlobalFunctions');
 const { errorHandler } = require('../Utils/common/api-middleware');
 const { API_RESP_CODES, errorCodes, ErrorMessages } = require('../Utils/common/error-codes');
-const { validateVehicle } = require('../Utils/common/validator');
+const { validateVehicle, validateEditVehicle } = require('../Utils/common/validator');
 const Brand = require("../Schema/brandSchema");
 const Wishlist = require("../Schema/wishlistInquirySchema")
 
@@ -714,6 +714,71 @@ exports.sortVehicleByPrice = async (req, res) => {
 
 
 
+exports.editVehicle = async (req, res) => {
+    try {
+        const vehicleId = req.query.vehicleId
+        const updatedBy = req.user._id;
+        const modelCoverImage = req.files?.modelCoverImage ? req.files.modelCoverImage[0].path : null;
+        const multiImageIds = [];
+        console.log("🚀 ~ exports.editVehicle= ~ multiImageIds:", modelCoverImage)
+
+        if (req.files?.modelMultiImages) {
+            const modelMultiImages = req.files?.modelMultiImages;
+            for (const image of modelMultiImages) {
+                multiImageIds.push({ img: image.path });
+            }
+        }
+
+        const { error } = validateEditVehicle({
+            ...req.body,
+            modelCoverImage: modelCoverImage,
+            multiImageIds: multiImageIds,
+            updatedBy
+        });
+
+        if (error) {
+            return res
+                .status(400)
+                .json({
+                    success: false,
+                    message: error.details[0].message,
+                    data: null,
+                });
+        }
+
+        const formData = {
+            ...req.body,
+            modelCoverImage: modelCoverImage,
+            multiImageIds: multiImageIds,
+            updatedBy
+        }
+
+        const result = await vehicleService.vehicleEditService(vehicleId, formData);
+
+
+        let statusCode = API_RESP_CODES.VEHICLE_EDIT.status;
+        let message = result.message;
+        let data = result.data;
+
+
+        if (result.message === ErrorMessages.BRAND_NOT_FOUND) {
+            statusCode = 404
+            message = ErrorMessages.BRAND_NOT_FOUND;
+        }
+
+
+        res.status(statusCode)
+            .json({ success: result.status, message: message, data: data });
+
+
+    } catch (error) {
+        if (error.code === 11000 && error.keyPattern && error.keyValue) {
+            return res.status(400).json({ success: false, message: 'Key already present in the database,Unique key required', error: error.keyValue });
+        }
+
+        errorHandler(res, error);
+    }
+};
 
 
 

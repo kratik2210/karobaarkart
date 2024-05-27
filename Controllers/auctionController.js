@@ -138,7 +138,7 @@ exports.placeBid = _g.asyncMiddlewareController(async (req, res) => {
         const auctionId = req.query.auctionId
         const currentBid = req.body.currentBid
 
-        const result = isPaid && await AuctionService.placeBidService(auctionId, userId, currentBid);
+        const result = await AuctionService.placeBidService(auctionId, userId, currentBid);
 
         let statusCode = errorCodes.SUCCESS.Value;
         let message = result.message;

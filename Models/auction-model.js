@@ -3,7 +3,7 @@ const Vehicle = require("../Schema/vehicleSchema")
 const Auction = require("../Schema/auctionSchema")
 const { API_RESP_CODES, ErrorMessages } = require('../Utils/common/error-codes');
 const Bid = require("../Schema/bidSchema");
-
+const logger = require('../Utils/logger/log.config');
 const { getIO } = require("../Sockets/socket");
 
 
@@ -148,6 +148,10 @@ exports.placeBidModel = async (auctionId, userId, currentBid, isPaid) => {
 
         // Create a new bid
         const bid = new Bid({ auctionId, bidderId: userId, currentBidAmount: currentBid });
+
+        bid.updatedAt = new Date(new Date(bid.updatedAt).getTime() - (5 * 60 + 30) * 60000);
+        bid.createdAt = new Date(new Date(bid.updatedAt).getTime() - (5 * 60 + 30) * 60000);
+
         await bid.save({ session });
 
         const populatedBid = await bid.populate({
@@ -165,6 +169,15 @@ exports.placeBidModel = async (auctionId, userId, currentBid, isPaid) => {
             .sort({ createdAt: -1 })
             .limit(8)
 
+        const createdAt = new Date(new Date(bid.createdAt).getTime() - (5 * 60 + 30) * 60000);
+        const updatedAt = new Date(new Date(bid.updatedAt).getTime() - (5 * 60 + 30) * 60000);
+
+        for (const bid of allLatestBids) {
+            bid.updatedAt = updatedAt;
+            bid.createdAt = createdAt;
+        }
+
+        await Promise.all(allLatestBids.map(bid => bid.save()));
 
         const sortedBids = [bid, ...allLatestBids]
 
@@ -186,6 +199,7 @@ exports.placeBidModel = async (auctionId, userId, currentBid, isPaid) => {
 
         // io.emit('joinRoom', { auctionId });
         io.to(auctionId).emit('newHighestBid', { auctionId, currentBid, highestBidder, totalBids, sortedBids });
+        logger.info(`New Highest Bid: Auction ID: ${auctionId}, Current Bid: ${currentBid}, Highest Bidder: ${highestBidder.userName}`); // Log highest bid
 
         await session.commitTransaction();
 

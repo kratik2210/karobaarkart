@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
+const moment = require('moment-timezone');
 
 const bidSchema = new Schema({
     auctionId: {
@@ -22,7 +23,7 @@ const bidSchema = new Schema({
     },
     createdAt: {
         type: Date,
-        default: Date.now
+        default: () => moment().utcOffset('-05:30').toDate()
     },
     updatedBy: {
         type: Schema.Types.ObjectId,
@@ -30,9 +31,9 @@ const bidSchema = new Schema({
     },
     updatedAt: {
         type: Date,
-        default: Date.now
+        default: () => moment().utcOffset('-05:30').toDate()
     }
-});
+})
 
 const Bid = mongoose.model('Bid', bidSchema);
 

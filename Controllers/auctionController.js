@@ -176,14 +176,23 @@ exports.getBidsOnProfile = _g.asyncMiddlewareController(async (req, res) => {
             .populate({
                 path: 'auctionId',
                 model: 'Auction',
-                populate: {
-                    path: 'vehicleId',
-                    populate: {
-                        path: 'brandId',
-                        model: 'Brand',
-                        select: 'brandName _id',
-                    },
-                },
+                populate: [
+                    {
+                        path: 'vehicleId',
+                        populate: [
+                            {
+                                path: 'brandId',
+                                model: 'Brand',
+                                select: 'brandName _id',
+                            },
+                            {
+                                path: 'modelName',
+                                model: 'VehiclePricing',
+                                select: 'modelName _id',
+                            }
+                        ]
+                    }
+                ]
             })
             .sort({ updatedAt: -1 });
 
@@ -202,3 +211,50 @@ exports.getBidsOnProfile = _g.asyncMiddlewareController(async (req, res) => {
         res.status(500).json({ status: false, message: 'Internal server error', data: null });
     }
 });
+
+
+exports.getFullBids = _g.asyncMiddlewareController(async (req, res) => {
+
+    try {
+        let returnResult = { status: false, message: '', data: null };
+
+
+        const allBids = await Bid.find()
+            .populate({
+                path: 'auctionId',
+                model: 'Auction',
+                populate: [
+                    {
+                        path: 'vehicleId',
+                        populate: [
+                            {
+                                path: 'brandId',
+                                model: 'Brand',
+                                select: 'brandName _id',
+                            },
+                            {
+                                path: 'modelName',
+                                model: 'VehiclePricing',
+                                select: 'modelName _id',
+                            }
+                        ]
+                    }
+                ]
+            })
+            .sort({ createdAt: -1 });
+
+        if (!allBids || allBids.length === 0) {
+            return res.status(200).json({ status: false, message: 'No bids found', data: null });
+        }
+
+        returnResult.status = true;
+        returnResult.message = 'All bids found';
+        returnResult.data = allBids;
+
+        res.status(200).json(returnResult);
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ status: false, message: 'Internal server error', data: null });
+    }
+})

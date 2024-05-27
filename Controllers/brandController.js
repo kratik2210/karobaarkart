@@ -6,6 +6,7 @@ const { errorHandler, apiValidResponse, internalErrResp } = require("../Utils/co
 const { validateWishlist, validateEditBrand } = require("../Utils/common/validator");
 const Joi = require('joi/lib');
 const Vehicle = require('../Schema/vehicleSchema');
+const User = require('../Schema/usersSchema');
 
 exports.createBrand = async (req, res) => {
     try {
@@ -137,3 +138,27 @@ exports.updateSellingPriceForUsedVehicle = _g.asyncMiddlewareController(async (r
         res.status(500).json({ error: 'Internal server error', data: error });
     }
 })
+
+
+
+exports.getAllPaidUsers = async (req, res) => {
+    try {
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 5;
+
+        const skip = (page - 1) * limit;
+
+        const brands = await User.find({ isPaid: true })
+            .skip(skip)
+            .limit(limit);
+
+        res.status(200).json({
+            success: true,
+            message: 'All Paid Users fetched successfully',
+            data: brands,
+        });
+    } catch (error) {
+        console.error('Error fetching brands:', error);
+        res.status(500).json({ success: false, message: 'Internal server error', error });
+    }
+};

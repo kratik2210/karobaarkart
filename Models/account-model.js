@@ -87,7 +87,9 @@ exports.adminSignIn = async (phoneNumber, email, password) => {
             userName: 1,
             phoneNumber: 1,
             email: 1,
-            password: 1
+            password: 1,
+            isPaid: 1,
+            isApproved: 1
         });
 
         if (!user) {
@@ -109,6 +111,7 @@ exports.adminSignIn = async (phoneNumber, email, password) => {
             userName: user.userName,
             phoneNumber: user.phoneNumber,
             email: user.email,
+            isApproved: user.isApproved,
         }
 
 

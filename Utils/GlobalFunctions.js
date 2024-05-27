@@ -45,7 +45,7 @@ exports.authMiddleware = function (req, res, next) {
             });
          } else {
             console.log("🚀 ~ decoded:", decoded)
-            if (!decoded.isApproved) {
+            if (!decoded.isApproved && decoded.userType !== 'admin') {
                return res.status(403).json({
                   success: false,
                   message: 'Account disabled by admin',

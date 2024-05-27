@@ -1,9 +1,10 @@
 const express = require('express');
-const { createBrand, getAllBrands, editBrand, updateSellingPriceForUsedVehicle } = require('../Controllers/brandController');
+const { createBrand, getAllBrands, editBrand, updateSellingPriceForUsedVehicle, getAllPaidUsers } = require('../Controllers/brandController');
 const router = express.Router();
 const upload = require('../Utils/common/upload')
 const { authMiddleware } = require('../Utils/GlobalFunctions');
 const { updateUser } = require('../Controllers/userController');
+const { getFullBids } = require('../Controllers/auctionController');
 
 router.post('/create-brand', upload.fields([
     { name: 'brandLogo', maxCount: 1 },
@@ -22,6 +23,10 @@ router.put('/admin/update-profile', authMiddleware, upload.fields([
 ]), updateUser)
 
 router.put('/selling-price-updation', authMiddleware, updateSellingPriceForUsedVehicle)
+
+router.get('/all-bids', authMiddleware, getFullBids)
+
+router.get('/all-paid-users', authMiddleware, getAllPaidUsers)
 
 
 

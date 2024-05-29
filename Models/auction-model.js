@@ -5,6 +5,7 @@ const { API_RESP_CODES, ErrorMessages } = require('../Utils/common/error-codes')
 const Bid = require("../Schema/bidSchema");
 const logger = require('../Utils/logger/log.config');
 const { getIO } = require("../Sockets/socket");
+const moment = require('moment-timezone');
 
 
 exports.oneLiveAuction = async (auctionId, userId) => {
@@ -132,6 +133,17 @@ exports.placeBidModel = async (auctionId, userId, currentBid, isPaid) => {
             return { status: false, message: API_RESP_CODES.ONE_AUCTION_NOT_FOUND.message, data: null };
         }
 
+
+        const currentTimeMoment = moment().tz('Asia/Kolkata');
+        const currentTimeNoOffset = currentTimeMoment.add(5, 'hours').add(30, 'minutes');
+
+        const currentTime = currentTimeNoOffset.toDate();
+        const endTime = oneAuction.endTime;
+        if (currentTime > endTime) {
+            return { status: false, message: 'Auction has ended', data: null };
+        }
+
+
         // Check if the initial bid is greater than the starting bid
         if (!oneAuction.currentBid && currentBid <= oneAuction.startingBid) {
             io.to(auctionId).emit('bidError', { message: 'Initial bid must be higher than the starting bid' });
@@ -146,13 +158,25 @@ exports.placeBidModel = async (auctionId, userId, currentBid, isPaid) => {
             return { status: false, message: 'bid must be higher than the current highest bid', data: null };
         }
 
+
+
+
+
         // Create a new bid
         const bid = new Bid({ auctionId, bidderId: userId, currentBidAmount: currentBid });
 
-        bid.updatedAt = new Date(new Date(bid.updatedAt).getTime() - (5 * 60 + 30) * 60000);
-        bid.createdAt = new Date(new Date(bid.updatedAt).getTime() - (5 * 60 + 30) * 60000);
+        // bid.updatedAt = new Date(new Date(bid.updatedAt).getTime() - (5 * 60 + 30) * 60000);
+        // bid.createdAt = new Date(new Date(bid.updatedAt).getTime() - (5 * 60 + 30) * 60000);
 
         await bid.save({ session });
+
+
+
+        const twoMinutesBeforeEndTime = new Date(endTime.getTime() - 2 * 60 * 1000);
+        if (currentTime >= twoMinutesBeforeEndTime && currentTime < endTime) {
+            // Extend the end time by two minutes
+            oneAuction.endTime = new Date(endTime.getTime() + 2 * 60 * 1000);
+        }
 
         const populatedBid = await bid.populate({
             path: 'bidderId',
@@ -169,13 +193,13 @@ exports.placeBidModel = async (auctionId, userId, currentBid, isPaid) => {
             .sort({ createdAt: -1 })
             .limit(8)
 
-        const createdAt = new Date(new Date(bid.createdAt).getTime() - (5 * 60 + 30) * 60000);
-        const updatedAt = new Date(new Date(bid.updatedAt).getTime() - (5 * 60 + 30) * 60000);
+        // const createdAt = new Date(new Date(bid.createdAt).getTime() - (5 * 60 + 30) * 60000);
+        // const updatedAt = new Date(new Date(bid.updatedAt).getTime() - (5 * 60 + 30) * 60000);
 
-        for (const bid of allLatestBids) {
-            bid.updatedAt = updatedAt;
-            bid.createdAt = createdAt;
-        }
+        // for (const bid of allLatestBids) {
+        //     bid.updatedAt = updatedAt;
+        //     bid.createdAt = createdAt;
+        // }
 
         await Promise.all(allLatestBids.map(bid => bid.save()));
 

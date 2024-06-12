@@ -32,7 +32,7 @@ const expectedParams = {
         optional: ['validateTokenOnly'],
     },
     authenticateVerifyOTP: {
-        required: ['phoneNumber', 'otpCode'],
+        required: ['phoneNumber', 'otpCode', 'fcm_token'],
         optional: [],
     },
 };

@@ -211,7 +211,7 @@ exports.loginAccount = async (req, res) => {
 
 exports.OTPverification = _g.asyncMiddlewareController(async (req, res) => {
     try {
-        const { phoneNumber, otpCode } = req.body;
+        const { phoneNumber, otpCode, fcm_token } = req.body;
 
         const missingParams = getMissingParams(
             expectedParams.authenticateVerifyOTP,
@@ -222,7 +222,7 @@ exports.OTPverification = _g.asyncMiddlewareController(async (req, res) => {
                 .status(errorCodes.BAD_REQUEST.Value)
                 .json({ status: false, message: missingParams, data: null });
         }
-        const result = await AccountService.verifyOTP({ phoneNumber, otpCode });
+        const result = await AccountService.verifyOTP({ phoneNumber, otpCode, fcm_token });
 
         let statusCode = errorCodes.SUCCESS.Value;
         let message = result.message;

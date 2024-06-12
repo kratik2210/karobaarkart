@@ -1,13 +1,26 @@
 const { default: mongoose } = require("mongoose");
 const Vehicle = require("../Schema/vehicleSchema")
 const Auction = require("../Schema/auctionSchema")
+const User = require("../Schema/usersSchema")
 const { API_RESP_CODES, ErrorMessages } = require('../Utils/common/error-codes');
 const Bid = require("../Schema/bidSchema");
 const logger = require('../Utils/logger/log.config');
 const { getIO } = require("../Sockets/socket");
 const moment = require('moment-timezone');
+const { sendMessage } = require('../Utils/Fcm');
 
 
+// const message = {
+//     message: {
+//         token: 'ecmsZXzqQnSGJuSK8BuPPZ:APA91bH20_VtkaRHvMK9dIA6ULsG4uycp8RlyQ269PNvwqrZyLt3QCAwsNRMx40ebxiqHC2jzDNdphil97QhCD8v6HTxV7rySbqivE1U1Tgl53LUyydqPRIyWc8T1wCRbWX7BQZjmToG',
+//         notification: {
+//             title: 'Test Notification',
+//             body: 'This is a test notification'
+//         }
+//     }
+// };
+
+// sendMessage(message);
 exports.oneLiveAuction = async (auctionId, userId) => {
 
     const session = await mongoose.startSession();
@@ -18,7 +31,6 @@ exports.oneLiveAuction = async (auctionId, userId) => {
 
         const isValidObjectIdUser = mongoose.Types.ObjectId.isValid(userId);
         const isValidObjectIdAuction = mongoose.Types.ObjectId.isValid(auctionId);
-
         if (!isValidObjectIdUser) {
             return { status: false, message: 'Invalid user ID format', data: null };
         }
@@ -118,6 +130,8 @@ exports.placeBidModel = async (auctionId, userId, currentBid, isPaid) => {
         let returnResult = { status: false, message: '', data: null };
         const isValidObjectIdUser = mongoose.Types.ObjectId.isValid(userId);
         const isValidObjectIdAuction = mongoose.Types.ObjectId.isValid(auctionId);
+
+
 
         if (!isValidObjectIdUser) {
             return { status: false, message: 'Invalid user ID format', data: null };
@@ -220,10 +234,26 @@ exports.placeBidModel = async (auctionId, userId, currentBid, isPaid) => {
         returnResult.message = API_RESP_CODES.ONE_AUCTION_FOUND.message;
         returnResult.data = oneAuction;
 
+        const allBidders = await Bid.find({ auctionId, bidderId: { $ne: userId } }).distinct('bidderId');
+
+        const bidderTokens = await User.find({ _id: { $in: allBidders } }).distinct('fcm_token');
 
         // io.emit('joinRoom', { auctionId });
         io.to(auctionId).emit('newHighestBid', { auctionId, currentBid, highestBidder, totalBids, sortedBids });
         logger.info(`New Highest Bid: Auction ID: ${auctionId}, Current Bid: ${currentBid}, Highest Bidder: ${highestBidder.userName}`); // Log highest bid
+
+        // const message = {
+        //     message: {
+        //         token: 'ecmsZXzqQnSGJuSK8BuPPZ:APA91bH20_VtkaRHvMK9dIA6ULsG4uycp8RlyQ269PNvwqrZyLt3QCAwsNRMx40ebxiqHC2jzDNdphil97QhCD8v6HTxV7rySbqivE1U1Tgl53LUyydqPRIyWc8T1wCRbWX7BQZjmToG',
+        //         notification: {
+        //             title: 'Test Notification',
+        //             body: 'This is a test notification'
+        //         }
+        //     }
+        // };
+        for (const token of bidderTokens) {
+            await sendMessage({ message: { token: token, notification: { title: 'New Bid', body: 'A new bid has been placed on the auction' } } });
+        }
 
         await session.commitTransaction();
 

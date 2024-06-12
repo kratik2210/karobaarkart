@@ -5,14 +5,14 @@ const _g = require('../Utils/GlobalFunctions');
 const { JWT_EXPIRY_IN_HOURS, JWT_REFRESH_EXPIRY_IN_HOURS } = require("../Utils/common/constants");
 const LoginToken = require("../Schema/loginTokenSchema");
 const { ErrorMessages, API_RESP_CODES } = require('../Utils/common/error-codes')
-
 exports.verifyOTP = async (formData) => {
     const session = await mongoose.startSession();
     session.startTransaction();
     try {
 
-        const { phoneNumber, otpCode } = formData
+        const { phoneNumber, otpCode, fcm_token } = formData
         let returnResult = { status: false, message: '', data: null };
+        console.log("🚀 ~ exports.verifyOTP= ~ fcm_token:", fcm_token)
         const dateTimeNow = new Date();
 
         const user = await Users.findOne({ phoneNumber }).select({
@@ -22,11 +22,24 @@ exports.verifyOTP = async (formData) => {
             email: 1,
             userType: 1,
             isPaid: 1,
-            isApproved: 1
+            isApproved: 1,
+            fcm_token: 1
         })
         if (!user) {
             returnResult.message = ErrorMessages.OTP_EXPIRED;
             return returnResult;
+        }
+
+        let fcmToken;
+
+        if (fcm_token) {
+            user.fcm_token = fcm_token;
+            try {
+                await user.save();
+            } catch (error) {
+                console.error('Error saving user:', error);
+                // Handle the error appropriately
+            }
         }
 
 

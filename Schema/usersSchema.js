@@ -108,6 +108,10 @@ const userSchema = new Schema({
         type: String,
         default: null,
     },
+    fcm_token: {
+        type: String,
+        default: null,
+    },
     timestamp: {
         type: Date,
         default: Date.now,

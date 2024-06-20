@@ -14,6 +14,7 @@ exports.createAuction = async (req, res) => {
     try {
         const vehicleId = req.query.vehicleId
         const { startTime, endTime, startingBid, rating } = req.body;
+        console.log("🚀 ~ exports.createAuction= ~ startTime:", new Date(startTime))
 
         const { error } = validateAuctionData({ startTime, endTime, startingBid, rating });
         if (error) {
@@ -29,13 +30,14 @@ exports.createAuction = async (req, res) => {
 
         const newAuction = new Auction({
             vehicleId,
-            startTime,
-            endTime,
+            startTime: convertUTCtoIST(startTime),
+            endTime: convertUTCtoIST(endTime),
             startingBid,
             createdBy: req.user._id,
         });
 
         const savedAuction = await newAuction.save();
+        console.log("🚀 ~ exports.createAuction= ~ savedAuction:", savedAuction)
 
         vehicle.rating = rating;
         await vehicle.save();
@@ -46,7 +48,12 @@ exports.createAuction = async (req, res) => {
         const correctTime = moment().tz(timezone);
         const timezoneOffset = correctTime.utcOffset();
         const correctedStartTime = moment(savedAuction.startTime).tz(timezone).add(timezoneOffset, 'minutes').toDate();
+        const correctedEndTime = moment(savedAuction.endTime).tz(timezone).add(timezoneOffset, 'minutes').toDate();
+        console.log("🚀 ~ exports.createAuction= ~ correctedStartTime:", correctedStartTime)
+        console.log("🚀 ~ exports.createAuction= ~ correctedStartTime:", correctedEndTime)
         const adjustedTime = new Date(new Date(savedAuction.startTime).getTime() - (5 * 60 + 30) * 60000);
+        const adjustedTimeEnd = new Date(new Date(savedAuction.endTime).getTime() - (5 * 60 + 30) * 60000);
+        console.log("🚀 ~ exports.createAuction= ~ adjustedTimeEnd:", adjustedTimeEnd)
 
         const job = new CronJob(adjustedTime, async () => {
             const auction = await Auction.findById(savedAuction._id);
@@ -56,11 +63,19 @@ exports.createAuction = async (req, res) => {
             }
         });
 
+        const jobEnd = new CronJob(adjustedTimeEnd, async () => {
+            const auction = await Auction.findById(savedAuction._id);
+            if (auction) {
+                auction.auctionStatus = 'completed';
+                await auction.save();
+            }
+        });
+
         job.start();
+        jobEnd.start()
 
         res.status(201).json({ message: 'Auction created successfully', data: savedAuction });
     } catch (error) {
-        console.log("🚀 ~ exports.createAuction= ~ error:", error)
         res.status(500).json({ error: 'Internal server error', data: error });
     }
 };
@@ -258,3 +273,20 @@ exports.getFullBids = _g.asyncMiddlewareController(async (req, res) => {
         res.status(500).json({ status: false, message: 'Internal server error', data: null });
     }
 })
+
+
+function convertUTCtoIST(utcDate) {
+    // Create a new Date object from the UTC string
+    const date = new Date(utcDate);
+
+    // Convert UTC time to IST by adding 5 hours and 30 minutes
+    date.setHours(date.getHours() + 5);
+    date.setMinutes(date.getMinutes() + 30);
+
+    // Format the date in IST (e.g., "MM/DD/YYYY, HH:MM:SS AM/PM")
+    const istString = date.toLocaleString('en-US', {
+        timeZone: 'Asia/Kolkata', // Set to Indian Standard Time (IST)
+    });
+
+    return istString;
+}

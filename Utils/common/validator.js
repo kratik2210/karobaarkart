@@ -412,7 +412,7 @@ function validateEditVehicle(vehicle) {
             // modelNumber: Joi.number(),
             seatingCapacity: Joi.number(),
             modelCoverImage: Joi.string().allow(null),
-            modelMultiImages: Joi.array().items(Joi.string().allow(null)),
+            // modelMultiImages: Joi.array().items(Joi.string().allow(null)),
             // modelPrice: Joi.number().allow(null),
             modelLocation: Joi.string().allow(null),
             modelRating: Joi.number().allow(null),

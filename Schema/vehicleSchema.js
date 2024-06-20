@@ -54,7 +54,8 @@ const vehicleSchema = new Schema({
         type: Number,
     },
     insurance: {
-        type: Boolean
+        type: Boolean,
+        set: convertToBoolean
     },
     kmsDriven: {
         type: Number
@@ -72,6 +73,7 @@ const vehicleSchema = new Schema({
     },
     fitness: {
         type: Boolean,
+        set: convertToBoolean
     },
     createdBy: {
         type: Schema.Types.ObjectId,
@@ -118,6 +120,14 @@ const vehicleSchema = new Schema({
     //     type: Number
     // }
 });
+
+function convertToBoolean(value) {
+    if (value === 'valid') {
+        return true;
+    } else if (value === 'notvalid') {
+        return false;
+    }
+}
 
 const Vehicle = mongoose.model('Vehicle', vehicleSchema);
 

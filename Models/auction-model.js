@@ -74,7 +74,6 @@ exports.oneLiveAuction = async (auctionId, userId) => {
         const sortedBids = allLatestBids
 
 
-        console.log(sortedBids, 'sortedBids');
 
 
         if (!oneAuction || oneAuction.length === 0) {

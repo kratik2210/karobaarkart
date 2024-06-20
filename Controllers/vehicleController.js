@@ -720,7 +720,6 @@ exports.editVehicle = async (req, res) => {
         const updatedBy = req.user._id;
         const modelCoverImage = req.files?.modelCoverImage ? req.files.modelCoverImage[0].path : null;
         const multiImageIds = [];
-        console.log("🚀 ~ exports.editVehicle= ~ multiImageIds:", modelCoverImage)
 
         if (req.files?.modelMultiImages) {
             const modelMultiImages = req.files?.modelMultiImages;

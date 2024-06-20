@@ -212,23 +212,53 @@ exports.editVehicleModel = async (vehicleId, formData) => {
         }
 
         // Update fields only if they are provided in formData
+        // Object.keys(formData).forEach(field => {
+        //     if (formData[field] !== undefined) {
+        //         existingVehicle[field] = formData[field];
+        //     }
+        // });
+
         Object.keys(formData).forEach(field => {
             if (formData[field] !== undefined) {
-                existingVehicle[field] = formData[field];
+                if (field !== 'modelMultiImages') {
+                    existingVehicle[field] = formData[field];
+                }
             }
         });
 
-        // Convert string to boolean for fitness and insurance if provided
-        if (formData.fitness) {
-            existingVehicle.fitness = formData.fitness === 'valid';
-        }
-        if (formData.insurance) {
-            existingVehicle.insurance = formData.insurance === 'valid';
+        // Update modelMultiImages if new images are provided
+        if (formData.modelMultiImages) {
+            console.log("🚀 ~ exports.editVehicleModel= ~ formData.modelMultiImages:", formData.modelMultiImages);
+
+            // Convert array of image URLs to array of objects with _id and img properties
+            const images = formData?.modelMultiImages?.map(imageUrl => ({
+                _id: new mongoose.Types.ObjectId(), // Generate a new ObjectId for each image
+                img: imageUrl
+            }));
+
+            // If existing images exist, add new images to the array
+            if (existingVehicle.modelMultiImages && existingVehicle.modelMultiImages.length > 0) {
+                existingVehicle.modelMultiImages.push(...images);
+            } else {
+                // If no existing images, set the modelMultiImages field to the new array
+                existingVehicle.modelMultiImages = images;
+            }
         }
 
+
+        if (formData.fitness === 'valid') {
+            existingVehicle.fitness = true;
+        } else {
+            existingVehicle.fitness = false;
+        }
+
+        if (formData.insurance === 'valid') {
+            existingVehicle.insurance = true;
+        } else {
+            existingVehicle.insurance = false;
+        }
         const updatedVehicle = await existingVehicle.save();
 
-        // Update vehicle pricing if modelName or other related fields are provided
         if (formData.modelName || formData.modelYear || formData.insurance || formData.fitness || formData.bodyType || formData.tyreCondition) {
             const vehiclePricing = await VehiclePricing.findOne({ _id: updatedVehicle.modelName }).session(session);
             if (!vehiclePricing) {

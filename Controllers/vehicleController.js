@@ -185,8 +185,10 @@ exports.getVehicles = async (req, res) => {
         const limit = parseInt(req.query.limit) || 6;
         const category = req.query.category;
         const sellStatus = req.query.sellStatus;
-
         const skip = (page - 1) * limit;
+        const userType = req.user.userType;
+        console.log("🚀 ~ exports.getVehicles= ~ userType:", req.user)
+
         let query = {};
 
         if (category) {
@@ -199,36 +201,86 @@ exports.getVehicles = async (req, res) => {
         let vehicles;
         let totalCount;
 
-        if (Object.keys(query).length === 0) {
-            vehicles = await Vehicle.find().populate('brandId').populate({
-                path: 'modelName',
-                select: 'modelName _id',
-            }).skip(skip).limit(limit);
-            totalCount = await Vehicle.countDocuments();
+        // if (Object.keys(query).length === 0) {
+        //     vehicles = await Vehicle.find().populate('brandId').populate({
+        //         path: 'modelName',
+        //         select: 'modelName _id',
+        //     }).skip(skip).limit(limit);
+        //     totalCount = await Vehicle.countDocuments();
+        // } else {
+        //     vehicles = await Vehicle.find(query).populate('brandId').populate({
+        //         path: 'modelName',
+        //         select: 'modelName _id',
+        //     }).skip(skip).limit(limit);
+        //     totalCount = await Vehicle.countDocuments(query);
+        // }
+
+
+        if (userType === 'admin') {
+            // Admin gets all vehicles
+            if (Object.keys(query).length === 0) {
+                vehicles = await Vehicle.find()
+                    .populate('brandId')
+                    .populate({
+                        path: 'modelName',
+                        select: 'modelName _id',
+                    })
+                    .skip(skip)
+                    .limit(limit);
+                totalCount = await Vehicle.countDocuments();
+            } else {
+                vehicles = await Vehicle.find(query)
+                    .populate('brandId')
+                    .populate({
+                        path: 'modelName',
+                        select: 'modelName _id',
+                    })
+                    .skip(skip)
+                    .limit(limit);
+                totalCount = await Vehicle.countDocuments(query);
+            }
         } else {
-            vehicles = await Vehicle.find(query).populate('brandId').populate({
-                path: 'modelName',
-                select: 'modelName _id',
-            }).skip(skip).limit(limit);
-            totalCount = await Vehicle.countDocuments(query);
+            // Non-admin users have specific access rules
+            if (category === 'new') {
+                // Return vehicles with category 'new' and sellStatus 'sell'
+                vehicles = await Vehicle.find({ category: 'new', sellStatus: 'sell' })
+                    .populate('brandId')
+                    .populate({
+                        path: 'modelName',
+                        select: 'modelName _id',
+                    })
+                    .skip(skip)
+                    .limit(limit);
+                totalCount = await Vehicle.countDocuments({ category: 'new', sellStatus: 'sell' });
+            } else if (category === 'used') {
+                // Return vehicles with category 'used' and sellStatus 'used'
+                vehicles = await Vehicle.find({ category: 'used', sellStatus: 'used' })
+                    .populate('brandId')
+                    .populate({
+                        path: 'modelName',
+                        select: 'modelName _id',
+                    })
+                    .skip(skip)
+                    .limit(limit);
+                totalCount = await Vehicle.countDocuments({ category: 'used', sellStatus: 'used' });
+            } else {
+                // Default behavior for non-admin users, show all vehicles matching other criteria
+                if (Object.keys(query).length === 0) {
+                    vehicles = await Vehicle.find()
+                        .populate('brandId')
+                        .populate({
+                            path: 'modelName',
+                            select: 'modelName _id',
+                        })
+                        .skip(skip)
+                        .limit(limit);
+                    totalCount = await Vehicle.countDocuments();
+                }
+            }
         }
 
         const totalPages = Math.ceil(totalCount / limit);
 
-        // // Fetch wishlist items for the current user
-        // const wishlistItems = await Wishlist.find({ userId: req.user._id });
-        // console.log("🚀 ~ exports.getVehicles= ~ wishlistItems:", wishlistItems)
-
-
-        // // Map vehicleIds from wishlistItems
-        // const vehicleIdsInWishlist = wishlistItems.map(item => item.vehicleId.toString());
-
-
-        // // Loop through vehicles and mark those in the user's wishlist
-        // vehicles = vehicles.map(vehicle => ({
-        //     ...vehicle.toObject(), // Convert Mongoose document to plain JavaScript object
-        //     wishlist: vehicleIdsInWishlist.includes(vehicle._id.toString()) // Check if the vehicle is in the user's wishlist
-        // }));
 
 
         let wishlistItems = await Wishlist.find({ userId: req.user._id });
@@ -240,8 +292,7 @@ exports.getVehicles = async (req, res) => {
         });
 
 
-        // Loop through vehicles and update wishlist status based on the map
-        vehicles = vehicles.map(vehicle => ({
+        vehicles = vehicles && vehicles.map(vehicle => ({
             ...vehicle.toObject(), // Convert Mongoose document to plain JavaScript object
             wishlist: wishlistMap.has(vehicle._id.toString()) ? wishlistMap.get(vehicle._id.toString()) : false // Get wishlist status from the map
         }));

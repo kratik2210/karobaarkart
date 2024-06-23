@@ -53,18 +53,23 @@ const Brand = require("../Schema/brandSchema");
 //     }
 // }
 
-exports.editBrandModel = async (formData, userId, brandId) => {
+exports.editBrandModel = async (formData, userId, brandId, brandLogo) => {
     return new Promise(async (resolve, reject) => {
         try {
+            let updateFields = {
+                description: formData.description,
+                brandName: formData.brandName,
+                updatedBy: userId,
+                updatedAt: new Date()
+            };
+
+            if (brandLogo) {
+                updateFields.brandLogo = brandLogo;
+            }
+
             const updatedBrand = await Brand.findOneAndUpdate(
                 { _id: brandId },
-                {
-                    brandLogo: formData.brandLogo,
-                    description: formData.description,
-                    brandName: formData.brandName,
-                    updatedBy: userId,
-                    updatedAt: new Date()
-                },
+                updateFields,
                 { new: true }
             );
 

@@ -16,6 +16,9 @@ exports.createVehicle = async (formData) => {
             updatedBy, contactNumber
 
         } = formData;
+        console.log("🚀 ~ exports.createVehicle= ~ formData:", insurance, fitness)
+
+
 
 
         let returnResult = { status: false, message: '', data: null };
@@ -27,9 +30,9 @@ exports.createVehicle = async (formData) => {
             return returnResult;
         }
 
-        const fitnessBoolean = fitness == 'valid' ? true : false
+        // const fitnessBoolean = fitness == 'valid' ? true : false
 
-        const insuranceBoolean = insurance == 'valid' ? true : false
+        // const insuranceBoolean = insurance == 'valid' ? true : false
 
         const newVehicle = new Vehicle({
             brandId,
@@ -41,7 +44,7 @@ exports.createVehicle = async (formData) => {
             mileage,
             fuelType,
             loadingCapacity,
-            insurance: insuranceBoolean,
+            insurance,
             kmsDriven,
             category,
             createdBy,
@@ -49,7 +52,7 @@ exports.createVehicle = async (formData) => {
             modelMultiImages: multiImageIds,
             inquireStatus,
             tyreCondition,
-            fitness: fitnessBoolean,
+            fitness,
             bodyType,
             updatedBy,
             contactNumber,
@@ -190,6 +193,7 @@ exports.getSingleVehicle = async (vehicleId) => {
 
 
 exports.editVehicleModel = async (vehicleId, formData) => {
+    console.log("🚀 ~ exports.editVehicleModel= ~ formData:", formData)
     const session = await mongoose.startSession();
     session.startTransaction();
     try {
@@ -220,20 +224,23 @@ exports.editVehicleModel = async (vehicleId, formData) => {
 
         Object.keys(formData).forEach(field => {
             if (formData[field] !== undefined) {
-                if (field !== 'modelMultiImages') {
+                if (field !== 'modelMultiImages' && field !== 'modelCoverImage') {
                     existingVehicle[field] = formData[field];
                 }
             }
         });
 
+        if (formData.modelCoverImage !== null && formData.modelCoverImage !== undefined) {
+            existingVehicle.modelCoverImage = formData.modelCoverImage;
+        }
+
         // Update modelMultiImages if new images are provided
-        if (formData.modelMultiImages) {
-            console.log("🚀 ~ exports.editVehicleModel= ~ formData.modelMultiImages:", formData.modelMultiImages);
+        if (formData.multiImageIds) {
 
             // Convert array of image URLs to array of objects with _id and img properties
-            const images = formData?.modelMultiImages?.map(imageUrl => ({
+            const images = formData?.multiImageIds?.map(imageUrl => ({
                 _id: new mongoose.Types.ObjectId(), // Generate a new ObjectId for each image
-                img: imageUrl
+                img: imageUrl.img
             }));
 
             // If existing images exist, add new images to the array

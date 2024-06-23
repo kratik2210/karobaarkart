@@ -60,37 +60,39 @@ exports.getAllBrands = async (req, res) => {
     }
 };
 
-
 exports.editBrand = _g.asyncMiddlewareController(async (req, res) => {
-
     const userId = req.user._id;
-    const brandId = req.query.brandId
+    const brandId = req.query.brandId;
 
-    const { error } = validateEditBrand({
-        ...req.body
-    });
+    const { error } = validateEditBrand({ ...req.body });
 
     if (error) {
-
-        return res
-            .status(400)
-            .json({
-                success: false,
-                message: error.details[0].message,
-                data: null,
-            });
+        return res.status(400).json({
+            success: false,
+            message: error.details[0].message,
+            data: null,
+        });
     }
 
-    await BrandService.editBrandService(req.body, userId, brandId).then((dataResult) => {
-        let returnResponse = dataResult;
-        apiValidResponse(res, returnResponse);
-    })
-        .catch((err) => {
-            internalErrResp(res, err, 'editBrand');
-        });
+    try {
+        let brandLogo;
+        if (req.files && req.files.brandLogo) {
+            brandLogo = req.files.brandLogo[0].path; // Assuming you store the path to the brandLogo in req.files
+        }
 
+        await BrandService.editBrandService(req.body, userId, brandId, brandLogo)
+            .then((dataResult) => {
+                let returnResponse = dataResult;
+                apiValidResponse(res, returnResponse);
+            })
+            .catch((err) => {
+                internalErrResp(res, err, 'editBrand');
+            });
+    } catch (error) {
+        internalErrResp(res, error, 'editBrand');
+    }
+});
 
-})
 
 
 exports.updateSellingPriceForUsedVehicle = _g.asyncMiddlewareController(async (req, res) => {
@@ -160,5 +162,32 @@ exports.getAllPaidUsers = async (req, res) => {
     } catch (error) {
         console.error('Error fetching brands:', error);
         res.status(500).json({ success: false, message: 'Internal server error', error });
+    }
+};
+
+
+exports.getBrandById = async (req, res) => {
+    try {
+        const brandId = req.query.id;
+        console.log("🚀 ~ exports.getBrandById= ~ brandId:", brandId)
+
+        const brand = await Brands.findById(brandId);
+        console.log("🚀 ~ exports.getBrandById= ~ brand:", brand)
+
+        if (!brand) {
+            return res.status(404).json({
+                success: false,
+                message: 'Brand not found',
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: 'Brand fetched successfully',
+            data: brand,
+        });
+    } catch (error) {
+        console.error('Error fetching brand:', error);
+        res.status(500).json({ success: false, message: 'Internal server error' });
     }
 };
